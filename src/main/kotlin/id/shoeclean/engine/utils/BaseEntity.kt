@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 abstract class BaseEntity : Persistable<Long?> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @get:JvmName("id")
     var id: Long? = null
 
     @Version
