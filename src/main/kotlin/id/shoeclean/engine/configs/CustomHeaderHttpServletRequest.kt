@@ -12,9 +12,9 @@ import java.util.Enumeration
  * @since 2024-10-21
  */
 class CustomHeaderHttpServletRequest(
-    reques: HttpServletRequest,
+    request: HttpServletRequest,
     private val customHeader: Map<String, String>
-) : HttpServletRequestWrapper(reques) {
+) : HttpServletRequestWrapper(request) {
 
     override fun getHeader(name: String): String? {
         return customHeader[name] ?: super.getHeader(name)
