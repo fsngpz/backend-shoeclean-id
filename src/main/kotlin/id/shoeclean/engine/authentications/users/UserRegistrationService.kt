@@ -22,6 +22,7 @@ class UserRegistrationService(
     private val userRoleService: UserRoleService,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val userEventPublisher: UserEventPublisher
 ) : UserService(userRepository) {
 
     /**
@@ -61,8 +62,21 @@ class UserRegistrationService(
         val role = roleService.getOrCreate(roleName)
         // -- assign user to the role --
         userRoleService.assign(newUser, role)
+        // -- publish event --
+        sendEvent(newUser)
         // -- return the instance of newUser --
         return newUser
     }
 
+    /**
+     * a private function to publish event.
+     *
+     * @param user the [User] instance.
+     */
+    private fun sendEvent(user: User) {
+        // -- setup the instance of UserEventRequest --
+        val eventRequest = UserEventRequest(user)
+        // -- publish the event --
+        userEventPublisher.publish(eventRequest)
+    }
 }

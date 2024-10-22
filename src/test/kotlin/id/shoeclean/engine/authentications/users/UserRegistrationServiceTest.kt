@@ -46,6 +46,9 @@ internal class UserRegistrationServiceTest
 
     @MockBean
     private lateinit var mockPasswordEncoder: PasswordEncoder
+
+    @MockBean
+    private lateinit var mockUserEventPublisher: UserEventPublisher
     // -- end of region mock --
 
     @Test
@@ -55,6 +58,7 @@ internal class UserRegistrationServiceTest
         assertThat(mockRoleService).isNotNull
         assertThat(mockUserRoleService).isNotNull
         assertThat(mockPasswordEncoder).isNotNull
+        assertThat(mockUserEventPublisher).isNotNull
     }
 
     @ParameterizedTest
