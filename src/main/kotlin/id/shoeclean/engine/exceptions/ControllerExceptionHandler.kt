@@ -2,6 +2,7 @@ package id.shoeclean.engine.exceptions
 
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
@@ -40,10 +41,7 @@ class ControllerExceptionHandler {
     @ExceptionHandler
     fun handleIllegalArgumentExceptions(e: IllegalArgumentException): ResponseEntity<ErrorResponse> {
         // -- setup the instance of error response --
-        val errorResponse = ErrorResponse(
-            type = e.javaClass.simpleName,
-            message = e.message ?: e.stackTraceToString()
-        )
+        val errorResponse = getErrorResponse(e)
         // -- return as response entity --
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
     }
@@ -57,10 +55,7 @@ class ControllerExceptionHandler {
     @ExceptionHandler
     fun handleNoSuchElementException(e: NoSuchElementException): ResponseEntity<ErrorResponse> {
         // -- setup the instance of error response --
-        val errorResponse = ErrorResponse(
-            type = e.javaClass.simpleName,
-            message = e.message ?: e.stackTraceToString()
-        )
+        val errorResponse = getErrorResponse(e)
         // -- return as response entity --
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
     }
@@ -74,11 +69,50 @@ class ControllerExceptionHandler {
     @ExceptionHandler
     fun handleDuplicateEmailException(e: DuplicateEmailException): ResponseEntity<ErrorResponse> {
         // -- setup the instance of error response --
-        val errorResponse = ErrorResponse(
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse)
+    }
+
+    /**
+     * Handle the Bad Credential Exception.
+     *
+     * @param e the [BadCredentialsException].
+     * @return the [ErrorResponse] with [HttpStatus.UNAUTHORIZED].
+     */
+    @ExceptionHandler
+    fun handleBadCredentialsException(e: BadCredentialsException): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
+    }
+
+    /**
+     * Handle the Bad Credential Exception.
+     *
+     * @param e the [UserNotFoundException].
+     * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
+     */
+    @ExceptionHandler
+    fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+
+    }
+
+    /**
+     * a private method to handle setup the [ErrorResponse].
+     *
+     * @param e the [RuntimeException].
+     * @return the [ErrorResponse].
+     */
+    private fun getErrorResponse(e: RuntimeException): ErrorResponse {
+        return ErrorResponse(
             type = e.javaClass.simpleName,
             message = e.message ?: e.stackTraceToString()
         )
-        // -- return as response entity --
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse)
     }
 }
