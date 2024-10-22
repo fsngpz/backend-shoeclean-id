@@ -8,6 +8,7 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.OnDelete
 import org.hibernate.annotations.OnDeleteAction
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.OffsetDateTime
 
 /**
  * The entity model class for User.
@@ -26,6 +27,8 @@ class User(
     var mobile: String? = null
     var username: String? = null
     var attributes: String? = null
+    var tokenUid: String? = null
+    var emailVerifiedAt: OffsetDateTime? = null
 
     // -- many to one --
     @OneToMany(mappedBy = "user")

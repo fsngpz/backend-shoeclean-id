@@ -12,6 +12,8 @@ CREATE TABLE users
     username            text,
     mobile              text,
     attributes          text,
+    token_uid           text,
+    email_verified_at   timestamp WITH TIME ZONE,
     created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     creator_id          text                                               NOT NULL,
     updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -60,3 +62,71 @@ CREATE TABLE users_roles
     version             bigint                   DEFAULT 0                 NOT NULL
 );
 
+/*
+ * Accounts
+ */
+CREATE TABLE accounts
+(
+    id                  BIGSERIAL
+        CONSTRAINT accounts_id_pk
+            PRIMARY KEY,
+    user_id             bigint
+        CONSTRAINT accounts_user_id_fk
+            REFERENCES users
+            ON UPDATE CASCADE ON DELETE CASCADE,
+    name                text                                               NOT NULL,
+    profile_picture_url text,
+    created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    creator_id          text                                               NOT NULL,
+    updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updater_id          text                                               NOT NULL,
+    version             bigint                   DEFAULT 0                 NOT NULL
+);
+
+CREATE UNIQUE INDEX accounts_user_id_uindex ON users (user_id);
+
+/*
+ * Sneakers
+ */
+CREATE TABLE sneakers
+(
+    id                  BIGSERIAL
+        CONSTRAINT sneakers_id_pk
+            PRIMARY KEY,
+    account_id             bigint
+        CONSTRAINT sneakers_account_id_fk
+            REFERENCES accounts
+            ON UPDATE CASCADE ON DELETE CASCADE,
+    brand               text                                               NOT NULL,
+    color               text                                               NOT NULL,
+    image_url           text,
+    created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    creator_id          text                                               NOT NULL,
+    updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updater_id          text                                               NOT NULL,
+    version             bigint                   DEFAULT 0                 NOT NULL
+);
+
+/*
+ * Sneakers
+ */
+CREATE TABLE addresses
+(
+    id                  BIGSERIAL
+        CONSTRAINT addresses_id_pk
+            PRIMARY KEY,
+    account_id             bigint
+        CONSTRAINT addresses_account_id_fk
+            REFERENCES accounts
+            ON UPDATE CASCADE ON DELETE CASCADE,
+    label               text,
+    line                text                                               NOT NULL,
+    city                text                                               NOT NULL,
+    district            text                                               NOT NULL,
+    subdistrict         text                                               NOT NULL,
+    created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    creator_id          text                                               NOT NULL,
+    updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updater_id          text                                               NOT NULL,
+    version             bigint                   DEFAULT 0                 NOT NULL
+);
