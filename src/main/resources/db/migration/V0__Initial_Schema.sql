@@ -83,7 +83,7 @@ CREATE TABLE accounts
     version             bigint                   DEFAULT 0                 NOT NULL
 );
 
-CREATE UNIQUE INDEX accounts_user_id_uindex ON users (user_id);
+CREATE UNIQUE INDEX accounts_user_id_uindex ON accounts (user_id);
 
 /*
  * Sneakers

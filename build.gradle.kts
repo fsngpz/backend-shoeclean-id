@@ -47,6 +47,9 @@ dependencies {
     // -- apache commons --
     implementation("commons-io:commons-io:$apacheCommonsIoVersion")
 
+    // -- java mail sender --
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
     // -- spring doc --
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
 
