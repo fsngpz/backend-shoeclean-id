@@ -89,13 +89,28 @@ class ControllerExceptionHandler {
     }
 
     /**
-     * Handle the Bad Credential Exception.
+     * Handle the UserNotFoundException.
      *
      * @param e the [UserNotFoundException].
      * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
      */
     @ExceptionHandler
     fun handleUserNotFoundException(e: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+
+    }
+
+    /**
+     * Handle the SneakerNotFoundException.
+     *
+     * @param e the [SneakerNotFoundException].
+     * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
+     */
+    @ExceptionHandler
+    fun handleSneakerNotFoundException(e: SneakerNotFoundException): ResponseEntity<ErrorResponse> {
         // -- setup the instance of error response --
         val errorResponse = getErrorResponse(e)
         // -- return as response entity --

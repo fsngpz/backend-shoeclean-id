@@ -1,4 +1,4 @@
-package id.shoeclean.engine.sneaker
+package id.shoeclean.engine.sneakers
 
 import id.shoeclean.engine.accounts.Account
 import id.shoeclean.engine.utils.AuditableBaseEntity
