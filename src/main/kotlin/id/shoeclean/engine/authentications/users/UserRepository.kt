@@ -17,4 +17,12 @@ interface UserRepository : JpaRepository<User, Long> {
      * @return the [User] or null.
      */
     fun findByEmail(email: String): User?
+
+    /**
+     * a method to find the [User] using the token uid.
+     *
+     * @param tokenUid the token unique identifier.
+     * @return the [User] or null.
+     */
+    fun findByTokenUid(tokenUid: String): User?
 }

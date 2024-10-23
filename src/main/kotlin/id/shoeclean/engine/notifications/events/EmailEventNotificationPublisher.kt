@@ -20,11 +20,25 @@ class EmailEventNotificationPublisher(private val applicationEventPublisher: App
      * @param recipient the recipient email address.
      */
     fun publishEmailRegistration(recipient: String) {
-        logger.info("Starting to publish email event : {}", recipient)
+        logger.info("Starting to publish email registration event : {}", recipient)
         // -- setup the application event --
         val event = EmailRegistrationApplicationEvent(recipient)
         // -- publish the event --
         applicationEventPublisher.publishEvent(event)
-        logger.info("Finished to publish email event : {}", recipient)
+        logger.info("Finished to publish email registration event : {}", recipient)
+    }
+
+    /**
+     * a function to publish the email forgot password event.
+     *
+     * @param recipient the recipient email address.
+     */
+    fun publishEmailForgotPassword(recipient: String) {
+        logger.info("Starting to publish email forgot password event : {}", recipient)
+        // -- setup the application event --
+        val event = EmailForgotPasswordApplicationEvent(recipient)
+        // -- publish the event --
+        applicationEventPublisher.publishEvent(event)
+        logger.info("Finished to publish email forgot password event : {}", recipient)
     }
 }

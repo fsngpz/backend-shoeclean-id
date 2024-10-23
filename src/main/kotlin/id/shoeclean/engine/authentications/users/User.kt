@@ -20,8 +20,8 @@ import java.time.OffsetDateTime
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "users")
 class User(
-    val email: String,
-    val password: String,
+    var email: String,
+    var password: String,
 ) : AuditableBaseEntity() {
     // -- optional --
     var mobile: String? = null

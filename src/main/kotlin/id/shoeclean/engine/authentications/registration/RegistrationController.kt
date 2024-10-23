@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class RegistrationController(private val registrationService: RegistrationService) {
 
     /**
-     * a function to do register the new User.
+     * a POST mapping to do register the new User.
      *
      * @param request the [RegistrationRequest] payload.
      */
