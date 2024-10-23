@@ -2,6 +2,7 @@ package id.shoeclean.engine.authentications.registration
 
 import id.shoeclean.engine.authentications.users.User
 import id.shoeclean.engine.authentications.users.UserRegistrationService
+import id.shoeclean.engine.notifications.events.EmailEventNotificationPublisher
 import org.springframework.stereotype.Service
 
 /**
@@ -11,8 +12,11 @@ import org.springframework.stereotype.Service
  * @since 2024-10-21
  */
 @Service
-class RegistrationService(private val userRegistrationService: UserRegistrationService) {
-    
+class RegistrationService(
+    private val userRegistrationService: UserRegistrationService,
+    private val emailEventNotificationPublisher: EmailEventNotificationPublisher
+) {
+
     /**
      * a function to handle request register new [User].
      *
@@ -39,5 +43,7 @@ class RegistrationService(private val userRegistrationService: UserRegistrationS
             attributes = request.attributes,
             roleName = "ROLE_USER"
         )
+        // -- publish event email notification --
+        emailEventNotificationPublisher.publishEmailRegistration(request.email)
     }
 }

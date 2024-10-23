@@ -22,7 +22,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 class Account(
     @OneToOne
     @MapsId
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id")
     val user: User,
 ) : AuditableBaseEntity() {
     var name: String? = null

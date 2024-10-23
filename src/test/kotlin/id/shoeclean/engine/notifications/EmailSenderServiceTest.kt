@@ -1,4 +1,4 @@
-package id.shoeclean.engine.notification
+package id.shoeclean.engine.notifications
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
