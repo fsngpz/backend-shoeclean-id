@@ -24,7 +24,7 @@ class Account(
     @MapsId
     @JoinColumn(name = "id")
     val user: User,
-    val name: String
 ) : AuditableBaseEntity() {
+    var name: String? = null
     var profilePictureUrl: String? = null
 }
