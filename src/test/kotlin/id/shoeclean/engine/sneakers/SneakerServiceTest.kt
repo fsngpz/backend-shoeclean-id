@@ -48,6 +48,11 @@ class SneakerServiceTest(@Autowired private val sneakerService: SneakerService) 
         val mockAccount = mock<Account>()
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockSneakerRepository.save(any<Sneaker>())).thenAnswer { invocation ->
+            val savedSneaker = invocation.getArgument<Sneaker>(0)
+            savedSneaker.id = 100L
+            savedSneaker
+        }
 
         // -- execute --
         val result = sneakerService.create(1L, brand, color)
@@ -112,9 +117,9 @@ class SneakerServiceTest(@Autowired private val sneakerService: SneakerService) 
         val brand = "SHOE"
         val color = "RED"
         val mockAccount = mock<Account>()
-        val mockSneakerOne = Sneaker(mockAccount, brand, color)
-        val mockSneakerTwo = Sneaker(mockAccount, brand, color)
-        val mockSneakerThree = Sneaker(mockAccount, brand, color)
+        val mockSneakerOne = Sneaker(mockAccount, brand, color).apply { this.id = 1 }
+        val mockSneakerTwo = Sneaker(mockAccount, brand, color).apply { this.id = 2 }
+        val mockSneakerThree = Sneaker(mockAccount, brand, color).apply { this.id = 3 }
         val mockSneakers = listOf(mockSneakerOne, mockSneakerTwo, mockSneakerThree)
         // -- mock --
         whenever(mockSneakerRepository.findAllByFilter(any<Long>(), anyOrNull(), any<Pageable>())).thenReturn(

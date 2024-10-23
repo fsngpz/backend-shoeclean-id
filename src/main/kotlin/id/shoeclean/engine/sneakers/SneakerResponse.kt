@@ -8,5 +8,5 @@ package id.shoeclean.engine.sneakers
  */
 
 data class SneakerResponse(
-    val brand: String, val color: String, val imageUrl: String?
+    val id: Long, val brand: String, val color: String, val imageUrl: String?
 )
