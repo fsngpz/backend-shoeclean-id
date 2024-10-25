@@ -27,5 +27,6 @@ class Address(
     var line: String,
     var city: String,
     var district: String,
-    var subdistrict: String
+    var subdistrict: String,
+    var state: String
 ) : AuditableBaseEntity()

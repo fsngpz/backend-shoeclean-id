@@ -124,6 +124,7 @@ CREATE TABLE addresses
     city                text                                               NOT NULL,
     district            text                                               NOT NULL,
     subdistrict         text                                               NOT NULL,
+    state               text                                               NOT NULL,
     created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     creator_id          text                                               NOT NULL,
     updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
