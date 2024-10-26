@@ -158,7 +158,7 @@ CREATE TABLE services
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
-CREATE UNIQUE INDEX services_type_uindex ON users (type);
+CREATE UNIQUE INDEX services_type_uindex ON services (type);
 
 /*
  * Vouchers
@@ -180,7 +180,7 @@ CREATE TABLE vouchers
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
-CREATE UNIQUE INDEX vouchers_code_uindex ON users (code);
+CREATE UNIQUE INDEX vouchers_code_uindex ON vouchers (code);
 
 /*
  * Orders
