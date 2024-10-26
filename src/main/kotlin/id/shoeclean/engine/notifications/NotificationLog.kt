@@ -1,32 +1,31 @@
-package id.shoeclean.engine.addresses
+package id.shoeclean.engine.notifications
 
 import id.shoeclean.engine.accounts.Account
 import id.shoeclean.engine.utils.AuditableBaseEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 /**
- * The entity class represent table of Address.
+ * The entity class represent the Notification Log.
  *
  * @author Ferdinand Sangap.
- * @since 2024-10-22
+ * @since 2024-10-26
  */
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-@Table(name = "addresses")
-class Address(
-    @OneToOne
+@Table(name = "notification_logs")
+class NotificationLog(
+    @ManyToOne
     @JoinColumn(name = "account_id")
     val account: Account,
 
-    var label: String,
-    var line: String,
-    var city: String,
-    var district: String,
-    var subdistrict: String,
-    var state: String
-) : AuditableBaseEntity()
+    val channel: NotificationChannel,
+    val type: String,
+    val content: String
+) : AuditableBaseEntity() {
+    var status: NotificationStatus = NotificationStatus.PENDING
+}

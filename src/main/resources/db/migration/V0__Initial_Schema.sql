@@ -262,9 +262,9 @@ CREATE TABLE orders_sneakers
 CREATE UNIQUE INDEX orders_sneakers_order_id_sneaker_id_uindex ON orders_sneakers (order_id, sneaker_id);
 
 /*
- * Notifications
+ * Notification Logs
  */
-CREATE TABLE notifications
+CREATE TABLE notification_logs
 (
     id                  BIGSERIAL
         CONSTRAINT notifications_id_pk
