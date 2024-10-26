@@ -1,8 +1,10 @@
-package id.shoeclean.engine.sneakers
+package id.shoeclean.engine.orders
 
 import id.shoeclean.engine.accounts.Account
-import id.shoeclean.engine.orders.OrderSneaker
+import id.shoeclean.engine.addresses.Address
+import id.shoeclean.engine.services.Service
 import id.shoeclean.engine.utils.AuditableBaseEntity
+import id.shoeclean.engine.vouchers.Voucher
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.JoinColumn
@@ -14,26 +16,36 @@ import org.hibernate.annotations.OnDeleteAction
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 /**
- * The entity class represent table of Sneaker.
+ * The class represent the entity of Order.
  *
  * @author Ferdinand Sangap.
- * @since 2024-10-22
+ * @since 2024-10-26
  */
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-@Table(name = "sneakers")
-class Sneaker(
+@Table(name = "orders")
+class Order(
     @OneToOne
     @JoinColumn(name = "account_id")
     val account: Account,
 
-    var brand: String,
-    var color: String
-) : AuditableBaseEntity() {
-    val imageUrl: String? = null
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    val address: Address,
 
+    @OneToOne
+    @JoinColumn(name = "service_id")
+    val service: Service,
+
+    @OneToOne
+    @JoinColumn(name = "voucher_id")
+    val voucher: Voucher,
+
+    val status: OrderStatus,
+    val totalPairs: Int
+) : AuditableBaseEntity() {
     // -- one to many --
-    @OneToMany(mappedBy = "sneaker")
+    @OneToMany(mappedBy = "order")
     @OnDelete(action = OnDeleteAction.CASCADE)
     var orderSneakers: Set<OrderSneaker> = setOf()
 }
