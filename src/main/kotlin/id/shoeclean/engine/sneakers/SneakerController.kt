@@ -29,6 +29,22 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Sneakers API")
 class SneakerController(private val sneakerService: SneakerService) {
 
+
+    /**
+     * a GET mapping to handle retrieving the sneaker by given unique identifier.
+     *
+     * @param id the sneaker unique identifier.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return the [SneakerResponse] instance.
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get a specific address by id")
+    fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): SneakerResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- get the address by id --
+        return sneakerService.get(accountId, id)
+    }
+
     /**
      * a GET mapping to handle request fetching the [Sneaker] using filter.
      *

@@ -19,6 +19,20 @@ class SneakerService(
 ) {
 
     /**
+     * a function to find the [Sneaker] of a specific account and specific sneaker unique identifier.
+     *
+     * @param accountId the account unique identifier.
+     * @param sneakerId the sneaker unique identifier.
+     * @return the [SneakerResponse] instance.
+     */
+    fun get(accountId: Long, sneakerId: Long): SneakerResponse {
+        val account = accountService.get(accountId)
+        // -- find the sneaker or else throw an exception --
+        return sneakerRepository.findByIdAndAccount(sneakerId, account)?.toResponse()
+            ?: throw SneakerNotFoundException("you dont have sneaker with id '$sneakerId'")
+    }
+
+    /**
      * a function to find the [Sneaker] using some filter.
      *
      * @param accountId the account unique identifier.

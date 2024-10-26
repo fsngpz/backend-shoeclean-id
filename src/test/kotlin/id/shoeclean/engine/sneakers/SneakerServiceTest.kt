@@ -138,4 +138,36 @@ class SneakerServiceTest(@Autowired private val sneakerService: SneakerService) 
         // -- verify --
         verify(mockSneakerRepository).findAllByFilter(any<Long>(), anyOrNull(), any<Pageable>())
     }
+
+    @Test
+    fun `get, sneaker not found`() {
+        val mockAccount = mock<Account>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockSneakerRepository.findByIdAndAccount(any<Long>(), any<Account>())).thenReturn(null)
+
+        // -- execute --
+        assertThrows<SneakerNotFoundException> { sneakerService.get(1L, 2L) }
+
+        // -- verify --
+        verify(mockSneakerRepository).findByIdAndAccount(any<Long>(), any<Account>())
+    }
+
+    @Test
+    fun `get and success`() {
+        val mockAccount = mock<Account>()
+        val mockSneaker = Sneaker(mockAccount, "Sneaker", "Blue").apply { this.id = 1 }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockSneakerRepository.findByIdAndAccount(any<Long>(), any<Account>())).thenReturn(mockSneaker)
+
+        // -- execute --
+        val result = sneakerService.get(1L, 2L)
+        assertThat(result.color).isEqualTo(mockSneaker.color)
+        assertThat(result.brand).isEqualTo(mockSneaker.brand)
+        assertThat(result.id).isEqualTo(mockSneaker.id)
+
+        // -- verify --
+        verify(mockSneakerRepository).findByIdAndAccount(any<Long>(), any<Account>())
+    }
 }
