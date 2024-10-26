@@ -141,14 +141,14 @@ CREATE TABLE addresses
 );
 
 /*
- * Services
+ * Catalog
  */
-CREATE TABLE services
+CREATE TABLE catalogs
 (
     id                  BIGSERIAL
-        CONSTRAINT services_id_pk
+        CONSTRAINT catalogs_id_pk
             PRIMARY KEY,
-    type                service_type                                       NOT NULL,
+    service_type        service_type                                       NOT NULL,
     description         text                                               NOT NULL,
     price               text                                               NOT NULL,
     created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -157,7 +157,7 @@ CREATE TABLE services
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
-CREATE UNIQUE INDEX services_type_uindex ON services (type);
+CREATE UNIQUE INDEX catalogs_type_uindex ON catalogs (service_type);
 
 /*
  * Vouchers
@@ -197,9 +197,9 @@ CREATE TABLE orders
         CONSTRAINT orders_address_id_fk
             REFERENCES addresses
             ON UPDATE CASCADE ON DELETE CASCADE,
-    service_id             bigint
-        CONSTRAINT orders_service_id_fk
-            REFERENCES services
+    catalog_id             bigint
+        CONSTRAINT orders_catalog_id_fk
+            REFERENCES catalogs
             ON UPDATE CASCADE ON DELETE CASCADE,
     voucher_id             bigint
         CONSTRAINT orders_voucher_id_fk

@@ -1,4 +1,4 @@
-package id.shoeclean.engine.services
+package id.shoeclean.engine.catalogs
 
 /**
  * The enum represent the service type.

@@ -1,4 +1,4 @@
-package id.shoeclean.engine.services
+package id.shoeclean.engine.catalogs
 
 import id.shoeclean.engine.utils.AuditableBaseEntity
 import jakarta.persistence.Entity
@@ -16,8 +16,8 @@ import java.math.BigDecimal
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "services")
-class Service(
-    var type: ServiceType,
+class Catalog(
+    var serviceType: ServiceType,
     var description: String,
     var price: BigDecimal
 ) : AuditableBaseEntity()

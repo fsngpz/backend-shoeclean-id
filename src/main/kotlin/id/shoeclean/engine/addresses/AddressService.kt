@@ -32,17 +32,17 @@ class AddressService(
     }
 
     /**
-     * a function to handle get the [AddressResponse] by given account and address unique identifier.
+     * a function to handle get the [Address] by given account and address unique identifier.
      *
      * @param accountId the account unique identifier.
      * @param addressId the address unique identifier.
-     * @return the [AddressResponse] instance.
+     * @return the [Address] instance.
      */
-    fun get(accountId: Long, addressId: Long): AddressResponse {
+    fun get(accountId: Long, addressId: Long): Address {
         // -- get the account --
         val account = accountService.get(accountId)
         // -- find the data and return --
-        return addressRepository.findByIdAndAccount(addressId, account)?.toResponse() ?: throw AddressNotFoundException(
+        return addressRepository.findByIdAndAccount(addressId, account) ?: throw AddressNotFoundException(
             "address with id $addressId does not exist"
         )
     }
@@ -85,10 +85,8 @@ class AddressService(
      * @param addressId the address unique identifier.
      */
     fun delete(accountId: Long, addressId: Long) {
-        val account = accountService.get(accountId)
-        // -- find the data and return --
-        val address = addressRepository.findByIdAndAccount(addressId, account)
-            ?: throw AddressNotFoundException("you dont have address with id $addressId")
+        // -- get the address  --
+        val address = get(accountId, addressId)
         // -- delete the address --
         return addressRepository.delete(address)
     }

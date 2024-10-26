@@ -1,8 +1,10 @@
 package id.shoeclean.engine.vouchers
 
+import id.shoeclean.engine.orders.Order
 import id.shoeclean.engine.utils.AuditableBaseEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.math.BigDecimal
@@ -25,4 +27,7 @@ class Voucher(
     var expiredAt: OffsetDateTime
 ) : AuditableBaseEntity() {
     var quantity: Int = 0
+
+    @OneToOne(mappedBy = "voucher")
+    val order: Order? = null
 }

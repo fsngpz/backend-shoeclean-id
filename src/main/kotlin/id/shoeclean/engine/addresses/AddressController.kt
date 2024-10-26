@@ -41,7 +41,7 @@ class AddressController(private val addressService: AddressService) {
     fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): AddressResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- get the address by id --
-        return addressService.get(accountId, id)
+        return addressService.get(accountId, id).toResponse()
     }
 
     /**

@@ -2,7 +2,7 @@ package id.shoeclean.engine.orders
 
 import id.shoeclean.engine.accounts.Account
 import id.shoeclean.engine.addresses.Address
-import id.shoeclean.engine.services.Service
+import id.shoeclean.engine.catalogs.Catalog
 import id.shoeclean.engine.utils.AuditableBaseEntity
 import id.shoeclean.engine.vouchers.Voucher
 import jakarta.persistence.Entity
@@ -22,9 +22,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
  * @since 2024-10-26
  */
 @Entity
-@EntityListeners(AuditingEntityListener::class)
+@EntityListeners(value = [AuditingEntityListener::class, OrderListener::class])
 @Table(name = "orders")
 class Order(
+
     @OneToOne
     @JoinColumn(name = "account_id")
     val account: Account,
@@ -34,16 +35,18 @@ class Order(
     val address: Address,
 
     @OneToOne
-    @JoinColumn(name = "service_id")
-    val service: Service,
-
-    @OneToOne
-    @JoinColumn(name = "voucher_id")
-    val voucher: Voucher,
+    @JoinColumn(name = "catalog_id")
+    val catalog: Catalog,
 
     val status: OrderStatus,
     val totalPairs: Int
 ) : AuditableBaseEntity() {
+    var orderId: String? = null
+
+    @OneToOne
+    @JoinColumn(name = "voucher_id")
+    val voucher: Voucher? = null
+
     // -- one to many --
     @OneToMany(mappedBy = "order")
     @OnDelete(action = OnDeleteAction.CASCADE)
