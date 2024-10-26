@@ -24,6 +24,15 @@ interface SneakerRepository : JpaRepository<Sneaker, Long> {
     fun findByIdAndAccount(id: Long, account: Account): Sneaker?
 
     /**
+     * a method to find the [Sneaker] by the list of sneaker id and the [Account].
+     *
+     * @param ids the list of sneaker unique identifier.
+     * @param account the [Account] instance.
+     * @return the [List] of [Sneaker].
+     */
+    fun findByIdInAndAccount(ids: List<Long>, account: Account): List<Sneaker>
+
+    /**
      * a method to find the [Sneaker] by the filter.
      *
      * @param accountId the account unique identifier.

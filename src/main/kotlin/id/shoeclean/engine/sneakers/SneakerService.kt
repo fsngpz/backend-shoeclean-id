@@ -33,6 +33,20 @@ class SneakerService(
     }
 
     /**
+     * a method to find the list of [Sneaker] with account unique identifier and list of sneaker ids.
+     *
+     * @param accountId the account unique identifier.
+     * @param sneakerIds the list of sneaker unique identifier.
+     * @return the list of [Sneaker].
+     */
+    fun findAll(accountId: Long, sneakerIds: List<Long>): List<Sneaker> {
+        val account = accountService.get(accountId)
+        // -- find the sneaker or else throw an exception --
+        return sneakerRepository.findByIdInAndAccount(sneakerIds, account)
+
+    }
+
+    /**
      * a function to find the [Sneaker] using some filter.
      *
      * @param accountId the account unique identifier.

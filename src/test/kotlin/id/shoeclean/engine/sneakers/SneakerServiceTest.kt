@@ -170,4 +170,39 @@ class SneakerServiceTest(@Autowired private val sneakerService: SneakerService) 
         // -- verify --
         verify(mockSneakerRepository).findByIdAndAccount(any<Long>(), any<Account>())
     }
+
+    @Test
+    fun `findAll list of sneakers, success but return empty`() {
+        val mockAccount = mock<Account>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockSneakerRepository.findByIdInAndAccount(any<List<Long>>(), any<Account>())).thenReturn(listOf())
+
+        // -- execute --
+        val result = sneakerService.findAll(1L, listOf(1L, 2L))
+        assertThat(result).isEmpty()
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockSneakerRepository).findByIdInAndAccount(any<List<Long>>(), any<Account>())
+    }
+
+    @Test
+    fun `findAll list of sneakers, success with data`() {
+        val mockAccount = mock<Account>()
+        val mockSneaker = mock<Sneaker>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockSneakerRepository.findByIdInAndAccount(any<List<Long>>(), any<Account>())).thenReturn(
+            listOf(mockSneaker, mockSneaker, mockSneaker)
+        )
+
+        // -- execute --
+        val result = sneakerService.findAll(1L, listOf(1L, 2L))
+        assertThat(result).isNotEmpty.hasSize(3)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockSneakerRepository).findByIdInAndAccount(any<List<Long>>(), any<Account>())
+    }
 }
