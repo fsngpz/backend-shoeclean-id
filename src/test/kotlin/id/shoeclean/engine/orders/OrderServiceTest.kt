@@ -131,7 +131,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val mockAccount = mock<Account>()
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(null)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(null)
 
         // -- execute --
         assertThrows<OrderNotFoundException> { orderService.get(1L, "USC111") }
@@ -146,7 +146,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val mockAccount = mock<Account>()
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         val result = orderService.get(1L, "USC111")
@@ -162,14 +162,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val mockAccount = mock<Account>()
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         assertThrows<IllegalArgumentException> { orderService.getDetails(1L, "USC111") }
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     /**
@@ -202,14 +202,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         }
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         assertThrows<VoucherNotSufficeOrderQtyException> { orderService.getDetails(1L, "USC111") }
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     /**
@@ -242,14 +242,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         }
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         assertThrows<VoucherNotSufficeOrderSubtotalException> { orderService.getDetails(1L, "USC111") }
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     @Test
@@ -282,7 +282,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
@@ -296,7 +296,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     @Test
@@ -329,7 +329,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
@@ -343,7 +343,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     @Test
@@ -368,7 +368,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
         // -- mock --
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
-        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
@@ -382,7 +382,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
-        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
     private fun createMockAddress(): Address {
