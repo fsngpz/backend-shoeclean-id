@@ -4,6 +4,7 @@ import id.shoeclean.engine.authentications.users.UserApplicationEvent
 import id.shoeclean.engine.authentications.users.UserEventRequest
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 /**
@@ -22,6 +23,7 @@ class NewAccountEventListener(private val accountService: AccountService) : Appl
      *
      * @param event the [UserApplicationEvent] instance.
      */
+    @Async
     override fun onApplicationEvent(event: UserApplicationEvent) {
         logger.info("Receiving the event with value: $event")
         // convert the source to instance of User --
