@@ -11,6 +11,6 @@ import id.shoeclean.engine.catalogs.ServiceType
 data class OrderRequest(
     val serviceType: ServiceType?,
     val totalPairs: Int?,
-    val sneakerId: Long?,
+    val sneakerIds: List<Long>?,
     val addressId: Long?
 )
