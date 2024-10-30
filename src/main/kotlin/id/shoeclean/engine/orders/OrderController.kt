@@ -3,6 +3,8 @@ package id.shoeclean.engine.orders
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,6 +21,13 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "Orders API")
 class OrderController(private val orderService: OrderService) {
 
+    /**
+     * a POST mapping to handle creating new [Order].
+     *
+     * @param request the [OrderRequest] instance.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return the [SubmitOrderResponse].
+     */
     @PostMapping
     @Operation(summary = "Create a new order")
     fun create(
@@ -47,5 +56,20 @@ class OrderController(private val orderService: OrderService) {
             request.serviceType,
             request.totalPairs
         )
+    }
+
+    /**
+     * a GET mapping to handle retrieving the [OrderDetailResponse].
+     *
+     * @param orderId the order unique identifier.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return the [OrderDetailResponse] instance.
+     */
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get details order by id")
+    fun get(@PathVariable orderId: String, httpServletRequest: HttpServletRequest): OrderDetailResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- get the details of order --
+        return orderService.getDetails(accountId, orderId)
     }
 }

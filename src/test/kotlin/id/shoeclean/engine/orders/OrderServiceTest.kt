@@ -7,6 +7,12 @@ import id.shoeclean.engine.addresses.AddressService
 import id.shoeclean.engine.catalogs.Catalog
 import id.shoeclean.engine.catalogs.CatalogService
 import id.shoeclean.engine.catalogs.ServiceType
+import id.shoeclean.engine.exceptions.OrderNotFoundException
+import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
+import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
+import id.shoeclean.engine.vouchers.AmountType
+import id.shoeclean.engine.vouchers.Voucher
+import id.shoeclean.engine.vouchers.VoucherType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
@@ -19,6 +25,9 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.math.BigDecimal
+import java.time.OffsetDateTime
+import kotlin.random.Random
 
 /**
  * The test class for [OrderService].
@@ -115,5 +124,277 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         verify(mockOrderRepository).save(captor.capture())
         val captured = captor.firstValue
         assertThat(captured.status).isEqualTo(OrderStatus.PENDING)
+    }
+
+    @Test
+    fun `get, not found`() {
+        val mockAccount = mock<Account>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(null)
+
+        // -- execute --
+        assertThrows<OrderNotFoundException> { orderService.get(1L, "USC111") }
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+    }
+
+    @Test
+    fun `get, success`() {
+        val mockOrder = mock<Order>()
+        val mockAccount = mock<Account>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        val result = orderService.get(1L, "USC111")
+        assertThat(result.javaClass).isEqualTo(Order::class.java)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+    }
+
+    @Test
+    fun `getDetails, order id null`() {
+        val mockOrder = mock<Order>()
+        val mockAccount = mock<Account>()
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        assertThrows<IllegalArgumentException> { orderService.getDetails(1L, "USC111") }
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    /**
+     * This test will throw an exception because the total pairs of order is 2 while the voucher amount is 3 with
+     * type [VoucherType.FREE_PAIR].
+     *
+     */
+    @Test
+    fun `getDetails, total pairs not suffice the voucher amount`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = mock<Address>()
+        val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.FREE_PAIR,
+            AmountType.AMOUNT,
+            BigDecimal(3),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.orderId = "USC111"
+            this.voucher = mockVoucher
+        }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        assertThrows<VoucherNotSufficeOrderQtyException> { orderService.getDetails(1L, "USC111") }
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    /**
+     * This test will throw an exception because the subtotal of order is 30_000 while the voucher amount is 50_000 with
+     * type [VoucherType.DISCOUNT].
+     *
+     */
+    @Test
+    fun `getDetails, subtotal not suffice the voucher amount`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = mock<Address>()
+        val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.DISCOUNT,
+            AmountType.AMOUNT,
+            BigDecimal(50_000),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.orderId = "USC111"
+            this.voucher = mockVoucher
+        }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        assertThrows<VoucherNotSufficeOrderSubtotalException> { orderService.getDetails(1L, "USC111") }
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `getDetails, with free pair voucher`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.FREE_PAIR,
+            AmountType.AMOUNT,
+            BigDecimal(1),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.orderId = "USC111"
+            this.voucher = mockVoucher
+        }
+
+        val expectedPrice = mockCatalog.price
+        val expectedDiscount = mockCatalog.price.multiply(mockVoucher.amount)
+        val expectedSubtotal = mockCatalog.price.multiply(BigDecimal(mockOrder.totalPairs))
+        val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        val result = orderService.getDetails(1L, "USC111")
+        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
+        assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
+        assertThat(result.price).isEqualTo(expectedPrice)
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+        assertThat(result.subtotal).isEqualTo(expectedSubtotal)
+        assertThat(result.totalAmount).isEqualTo(expectedTotalAmount)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `getDetails, with discount voucher`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.DISCOUNT,
+            AmountType.AMOUNT,
+            BigDecimal(10_000),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.orderId = "USC111"
+            this.voucher = mockVoucher
+        }
+
+        val expectedPrice = mockCatalog.price
+        val expectedDiscount = mockVoucher.amount
+        val expectedSubtotal = mockCatalog.price.multiply(BigDecimal(mockOrder.totalPairs))
+        val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        val result = orderService.getDetails(1L, "USC111")
+        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
+        assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
+        assertThat(result.price).isEqualTo(expectedPrice)
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+        assertThat(result.subtotal).isEqualTo(expectedSubtotal)
+        assertThat(result.totalAmount).isEqualTo(expectedTotalAmount)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `getDetails, without voucher`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.orderId = "USC111"
+        }
+
+        val expectedPrice = mockCatalog.price
+        val expectedDiscount = BigDecimal.ZERO
+        val expectedSubtotal = mockCatalog.price.multiply(BigDecimal(mockOrder.totalPairs))
+        val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByOrderIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        val result = orderService.getDetails(1L, "USC111")
+        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
+        assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
+        assertThat(result.price).isEqualTo(expectedPrice)
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+        assertThat(result.subtotal).isEqualTo(expectedSubtotal)
+        assertThat(result.totalAmount).isEqualTo(expectedTotalAmount)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByOrderIdAndAccount(any<String>(), any<Account>())
+    }
+
+    private fun createMockAddress(): Address {
+        val mockAccount = mock<Account>()
+        val label = "My House"
+        val line = "St Downtown"
+        val city = "Jurong East"
+        val district = "Jurong"
+        val subdistrict = "Selong"
+        val state = "Singapore"
+        return Address(mockAccount, label, line, city, district, subdistrict, state).apply {
+            this.id = Random(10L).nextLong()
+        }
     }
 }

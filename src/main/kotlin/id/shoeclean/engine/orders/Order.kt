@@ -45,7 +45,7 @@ class Order(
 
     @OneToOne
     @JoinColumn(name = "voucher_id")
-    val voucher: Voucher? = null
+    var voucher: Voucher? = null
 
     // -- one to many --
     @OneToMany(mappedBy = "order")

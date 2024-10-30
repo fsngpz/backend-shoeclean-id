@@ -16,7 +16,6 @@ class OrderSneakerService(
     private val orderSneakerRepository: OrderSneakerRepository
 ) {
 
-
     /**
      * a function to handle create the new [OrderSneaker] in bulk. This function will save one [Order]
      * with multiple [Sneaker].
