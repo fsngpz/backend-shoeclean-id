@@ -3,6 +3,7 @@ package id.shoeclean.engine.notifications.events
 import id.shoeclean.engine.notifications.EmailSenderService
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 
 /**
@@ -21,6 +22,7 @@ class EmailNotificationEventListener(private val emailSenderService: EmailSender
      * @param event the [EmailRegistrationApplicationEvent] instance
      */
     @EventListener
+    @Async
     fun handleEmailRegistrationEvent(event: EmailRegistrationApplicationEvent) {
         val recipient = event.getRecipient()
         logger.info("Received EmailRegistrationApplicationEvent for: $recipient")
@@ -34,6 +36,7 @@ class EmailNotificationEventListener(private val emailSenderService: EmailSender
      * @param event the [EmailForgotPasswordApplicationEvent] instance
      */
     @EventListener
+    @Async
     fun handleEmailForgotPasswordEvent(event: EmailForgotPasswordApplicationEvent) {
         val recipient = event.getRecipient()
         logger.info("Received EmailForgotPasswordApplicationEvent for: $recipient")
