@@ -73,7 +73,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockCatalogService.getByServiceType(any<ServiceType>())).thenReturn(mockCatalog)
         whenever(mockOrderRepository.save(any<Order>())).thenAnswer { invocation ->
             val order = invocation.getArgument<Order>(0)
-            order.orderId = "USCID-1021213"
+            order.uscId = "USCID-1021213"
             order
         }
 
@@ -101,7 +101,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockCatalogService.getByServiceType(any<ServiceType>())).thenReturn(mockCatalog)
         whenever(mockOrderRepository.save(any<Order>())).thenAnswer { invocation ->
             val order = invocation.getArgument<Order>(0)
-            order.orderId = null
+            order.uscId = null
             order
         }
 
@@ -197,7 +197,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             OrderStatus.PENDING,
             2
         ).apply {
-            this.orderId = "USC111"
+            this.uscId = "USC111"
             this.voucher = mockVoucher
         }
         // -- mock --
@@ -237,7 +237,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             OrderStatus.PENDING,
             2
         ).apply {
-            this.orderId = "USC111"
+            this.uscId = "USC111"
             this.voucher = mockVoucher
         }
         // -- mock --
@@ -272,7 +272,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             OrderStatus.PENDING,
             2
         ).apply {
-            this.orderId = "USC111"
+            this.uscId = "USC111"
             this.voucher = mockVoucher
         }
 
@@ -286,7 +286,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -319,7 +319,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             OrderStatus.PENDING,
             2
         ).apply {
-            this.orderId = "USC111"
+            this.uscId = "USC111"
             this.voucher = mockVoucher
         }
 
@@ -333,7 +333,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -359,7 +359,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             OrderStatus.PENDING,
             2
         ).apply {
-            this.orderId = "USC111"
+            this.uscId = "USC111"
         }
 
         val expectedPrice = mockCatalog.price
@@ -372,7 +372,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.orderId)
+        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)

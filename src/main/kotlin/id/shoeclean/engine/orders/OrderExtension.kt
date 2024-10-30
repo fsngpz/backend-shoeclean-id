@@ -13,7 +13,7 @@ import java.math.BigDecimal
  * @since 2024-10-30
  */
 fun Order.toSubmitOrderResponse(): SubmitOrderResponse {
-    val orderId = this.orderId
+    val orderId = this.uscId
     // -- validate the field orderId --
     requireNotNull(orderId) { "Order ID must not be null" }
     // -- return the instance --
@@ -27,7 +27,7 @@ fun Order.toSubmitOrderResponse(): SubmitOrderResponse {
  * @return the [OrderDetailResponse].
  */
 fun Order.toOrderDetailResponse(): OrderDetailResponse {
-    val orderId = this.orderId
+    val orderId = this.uscId
     // -- validate the field orderId --
     requireNotNull(orderId) { "Order ID must not be null" }
 

@@ -205,6 +205,7 @@ CREATE TABLE orders
         CONSTRAINT orders_voucher_id_fk
             REFERENCES vouchers
             ON UPDATE CASCADE ON DELETE CASCADE,
+    usc_id              text                                               NOT NULL,
     status              order_status                                       NOT NULL,
     total_pairs         text                                               NOT NULL,
     created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -213,6 +214,7 @@ CREATE TABLE orders
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
+CREATE UNIQUE INDEX orders_usc_id_uindex ON orders (usc_id);
 
 /*
  * Transactions

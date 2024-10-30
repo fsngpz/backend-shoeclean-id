@@ -5,6 +5,7 @@ import id.shoeclean.engine.addresses.AddressService
 import id.shoeclean.engine.catalogs.CatalogService
 import id.shoeclean.engine.catalogs.ServiceType
 import id.shoeclean.engine.exceptions.OrderNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 /**
@@ -25,14 +26,14 @@ class OrderService(
      * a function to find the [Order] of a specific account and specific order unique identifier.
      *
      * @param accountId the account unique identifier.
-     * @param orderId the order unique identifier.
+     * @param uscId the urban sneaker care order unique identifier.
      * @return the [Order] instance.
      */
-    fun get(accountId: Long, orderId: String): Order {
+    fun get(accountId: Long, uscId: String): Order {
         val account = accountService.get(accountId)
         // -- find the sneaker or else throw an exception --
-        return orderRepository.findByOrderIdAndAccount(orderId, account)
-            ?: throw OrderNotFoundException("you dont have order with id '$orderId'")
+        return orderRepository.findByUscIdAndAccount(uscId, account)
+            ?: throw OrderNotFoundException("you dont have order with id '$uscId'")
     }
 
     /**
@@ -45,6 +46,7 @@ class OrderService(
      * @param totalPairs the total pairs of sneaker.
      * @return the [SubmitOrderResponse].
      */
+    @Transactional
     fun create(
         accountId: Long,
         addressId: Long,
@@ -72,11 +74,11 @@ class OrderService(
      * a function to retrieve the [OrderDetailResponse].
      *
      * @param accountId the account unique identifier.
-     * @param orderId the order unique identifier.
+     * @param uscId the order unique identifier.
      * @return the [OrderDetailResponse].
      */
-    fun getDetails(accountId: Long, orderId: String): OrderDetailResponse {
-        val order = get(accountId, orderId)
+    fun getDetails(accountId: Long, uscId: String): OrderDetailResponse {
+        val order = get(accountId, uscId)
         // -- map and return the details of Order --
         return order.toOrderDetailResponse()
     }

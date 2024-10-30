@@ -73,7 +73,7 @@ class AddressController(private val addressService: AddressService) {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a Sneaker")
+    @Operation(summary = "Create new address")
     fun create(@RequestBody request: AddressRequest, httpServletRequest: HttpServletRequest): AddressResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- validate the request body --

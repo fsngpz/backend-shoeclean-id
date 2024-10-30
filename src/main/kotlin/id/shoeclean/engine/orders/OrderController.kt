@@ -61,15 +61,15 @@ class OrderController(private val orderService: OrderService) {
     /**
      * a GET mapping to handle retrieving the [OrderDetailResponse].
      *
-     * @param orderId the order unique identifier.
+     * @param uscId the urban sneaker care order unique identifier.
      * @param httpServletRequest the [HttpServletRequest].
      * @return the [OrderDetailResponse] instance.
      */
-    @GetMapping("/{orderId}")
+    @GetMapping("/{uscId}")
     @Operation(summary = "Get details order by id")
-    fun get(@PathVariable orderId: String, httpServletRequest: HttpServletRequest): OrderDetailResponse {
+    fun get(@PathVariable uscId: String, httpServletRequest: HttpServletRequest): OrderDetailResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- get the details of order --
-        return orderService.getDetails(accountId, orderId)
+        return orderService.getDetails(accountId, uscId)
     }
 }

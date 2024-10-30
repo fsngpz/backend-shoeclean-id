@@ -4,8 +4,12 @@ import id.shoeclean.engine.orders.Order
 import id.shoeclean.engine.utils.AuditableBaseEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import org.hibernate.annotations.JdbcType
+import org.hibernate.dialect.PostgreSQLEnumJdbcType
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -21,7 +25,13 @@ import java.time.OffsetDateTime
 @Table(name = "vouchers")
 class Voucher(
     val code: String,
+    
+    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType::class)
     val type: VoucherType,
+
+    @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType::class)
     val amountType: AmountType,
     var amount: BigDecimal,
     var expiredAt: OffsetDateTime

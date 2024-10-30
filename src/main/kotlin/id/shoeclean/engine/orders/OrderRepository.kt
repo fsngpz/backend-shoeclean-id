@@ -14,9 +14,9 @@ interface OrderRepository : JpaRepository<Order, Long> {
     /**
      * a method to find the [Order] by [Account] and order ID.
      *
-     * @param orderId the order unique identifier.
+     * @param uscId the Urban Sneaker Care order unique identifier.
      * @param account the [Order] instance.
      * @return the [Order] or null.
      */
-    fun findByOrderIdAndAccount(orderId: String, account: Account): Order?
+    fun findByUscIdAndAccount(uscId: String, account: Account): Order?
 }
