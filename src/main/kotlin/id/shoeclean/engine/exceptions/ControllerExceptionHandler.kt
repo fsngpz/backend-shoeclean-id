@@ -119,6 +119,86 @@ class ControllerExceptionHandler {
     }
 
     /**
+     * Handle the OrderNotFoundException.
+     *
+     * @param e the [OrderNotFoundException].
+     * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
+     */
+    @ExceptionHandler
+    fun handleOrderNotFoundException(
+        e: OrderNotFoundException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+    }
+
+    /**
+     * Handle the CatalogNotFoundException.
+     *
+     * @param e the [CatalogNotFoundException].
+     * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
+     */
+    @ExceptionHandler
+    fun handleCatalogNotFoundException(
+        e: CatalogNotFoundException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+    }
+
+    /**
+     * Handle the AddressNotFoundException.
+     *
+     * @param e the [AddressNotFoundException].
+     * @return the [ErrorResponse] with [HttpStatus.NOT_FOUND].
+     */
+    @ExceptionHandler
+    fun handleAddressNotFoundException(
+        e: AddressNotFoundException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse)
+    }
+
+    /**
+     * Handle the VoucherNotSufficeOrderSubtotalException.
+     *
+     * @param e the [VoucherNotSufficeOrderSubtotalException].
+     * @return the [ErrorResponse] with [HttpStatus.BAD_REQUEST].
+     */
+    @ExceptionHandler
+    fun handleVoucherNotSufficeOrderSubtotalException(
+        e: VoucherNotSufficeOrderSubtotalException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+
+    /**
+     * Handle the VoucherNotSufficeOrderQtyException.
+     *
+     * @param e the [VoucherNotSufficeOrderQtyException].
+     * @return the [ErrorResponse] with [HttpStatus.BAD_REQUEST].
+     */
+    @ExceptionHandler
+    fun handleVoucherNotSufficeOrderQtyException(
+        e: VoucherNotSufficeOrderQtyException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+
+    /**
      * a private method to handle setup the [ErrorResponse].
      *
      * @param e the [RuntimeException].
