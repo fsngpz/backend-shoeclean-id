@@ -29,7 +29,6 @@ class Transaction(
     val order: Order,
     val totalAmount: BigDecimal,
     val deduction: BigDecimal,
-    val finalAmount: BigDecimal,
 ) : AuditableBaseEntity() {
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType::class)

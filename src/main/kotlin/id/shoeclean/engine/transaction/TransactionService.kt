@@ -22,8 +22,7 @@ class TransactionService(private val transactionRepository: TransactionRepositor
         val transaction = Transaction(
             request.order,
             request.totalAmount,
-            request.deduction,
-            request.finalAmount
+            request.deduction
         ).apply {
             this.method = request.method
         }
