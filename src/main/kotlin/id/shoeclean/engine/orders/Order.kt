@@ -10,6 +10,7 @@ import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.PrePersist
@@ -52,7 +53,7 @@ class Order(
 ) : AuditableBaseEntity() {
     var uscId: String? = null
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "voucher_id")
     var voucher: Voucher? = null
 

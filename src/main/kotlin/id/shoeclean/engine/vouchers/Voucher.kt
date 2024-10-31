@@ -6,7 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
-import jakarta.persistence.OneToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.hibernate.annotations.JdbcType
 import org.hibernate.dialect.PostgreSQLEnumJdbcType
@@ -25,7 +25,7 @@ import java.time.OffsetDateTime
 @Table(name = "vouchers")
 class Voucher(
     val code: String,
-    
+
     @Enumerated(EnumType.STRING)
     @JdbcType(PostgreSQLEnumJdbcType::class)
     val type: VoucherType,
@@ -38,6 +38,6 @@ class Voucher(
 ) : AuditableBaseEntity() {
     var quantity: Int = 0
 
-    @OneToOne(mappedBy = "voucher")
-    val order: Order? = null
+    @OneToMany(mappedBy = "voucher")
+    var orders: Set<Order> = setOf()
 }
