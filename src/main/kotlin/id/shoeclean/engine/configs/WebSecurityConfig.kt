@@ -60,8 +60,7 @@ class WebSecurityConfig(
 
                 // -- auth --
                 it.requestMatchers(
-                    "/v1/auth/**",
-                    "/v1/products/information"
+                    "/v1/auth/**"
                 ).permitAll()
                 // -- backoffice --
                 it.requestMatchers("/v1/backoffice/**").hasAnyRole(ROLE_ADMIN)

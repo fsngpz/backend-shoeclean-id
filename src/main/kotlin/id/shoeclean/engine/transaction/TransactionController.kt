@@ -20,7 +20,7 @@ import java.time.OffsetDateTime
  * @since 2024-10-31
  */
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/v1/transactions")
 @Tag(name = "Transactions API")
 class TransactionController(private val transactionService: TransactionService) {
 

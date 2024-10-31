@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
  * @since 2024-10-31
  */
 @RestController
-@RequestMapping("/vouchers")
+@RequestMapping("/v1/vouchers")
 @Tag(name = "Vouchers API")
 class VoucherController(private val voucherService: VoucherService) {
 
