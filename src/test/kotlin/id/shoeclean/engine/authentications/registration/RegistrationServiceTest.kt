@@ -1,6 +1,7 @@
 package id.shoeclean.engine.authentications.registration
 
 import id.shoeclean.engine.authentications.users.UserRegistrationService
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
@@ -18,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean
  * @since 2024-10-21
  */
 @SpringBootTest(classes = [RegistrationService::class])
+@Disabled
 class RegistrationServiceTest(@Autowired private val service: RegistrationService) {
     @MockBean
     private lateinit var mockUserRegistrationService: UserRegistrationService

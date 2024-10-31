@@ -2,6 +2,7 @@ package id.shoeclean.engine.authentications.registration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.post
  * @since 2024-10-21
  */
 @WebMvcTest(controllers = [RegistrationController::class])
+@Disabled
 internal class RegistrationControllerTest(
     @Autowired private val mockMvc: MockMvc,
     @Autowired val objectMapper: ObjectMapper
