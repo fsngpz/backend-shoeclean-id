@@ -11,7 +11,7 @@ import java.math.BigDecimal
  * @since 2024-10-30
  */
 data class OrderDetailResponse(
-    val orderId: String,
+    val uscId: String,
     val address: AddressResponse,
     val totalPairs: Int,
     val serviceType: ServiceType,

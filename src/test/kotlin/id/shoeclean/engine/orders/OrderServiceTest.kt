@@ -10,6 +10,8 @@ import id.shoeclean.engine.catalogs.ServiceType
 import id.shoeclean.engine.exceptions.OrderNotFoundException
 import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
 import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
+import id.shoeclean.engine.transaction.EventNewTransactionRequest
+import id.shoeclean.engine.transaction.TransactionMethod
 import id.shoeclean.engine.vouchers.AmountType
 import id.shoeclean.engine.vouchers.Voucher
 import id.shoeclean.engine.vouchers.VoucherService
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,6 +59,9 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
     @MockBean
     private lateinit var mockOrderRepository: OrderRepository
 
+    @MockBean
+    private lateinit var mockOrderEventPublisher: OrderEventPublisher
+
     @Test
     fun `dependencies are not null`() {
         assertThat(orderService).isNotNull
@@ -64,6 +70,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         assertThat(mockCatalogService).isNotNull
         assertThat(mockOrderSneakerService).isNotNull
         assertThat(mockOrderRepository).isNotNull
+        assertThat(mockOrderEventPublisher).isNotNull
     }
 
     @Test
@@ -91,7 +98,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val captor = argumentCaptor<Order>()
         verify(mockOrderRepository).save(captor.capture())
         val captured = captor.firstValue
-        assertThat(captured.status).isEqualTo(OrderStatus.PENDING)
+        assertThat(captured.status).isEqualTo(OrderStatus.PENDING_CONFIRMATION)
     }
 
     @Test
@@ -127,7 +134,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         val captor = argumentCaptor<Order>()
         verify(mockOrderRepository).save(captor.capture())
         val captured = captor.firstValue
-        assertThat(captured.status).isEqualTo(OrderStatus.PENDING)
+        assertThat(captured.status).isEqualTo(OrderStatus.PENDING_CONFIRMATION)
     }
 
     @Test
@@ -198,7 +205,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -238,7 +245,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -273,7 +280,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -290,7 +297,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.uscId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -320,7 +327,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -337,7 +344,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.uscId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -360,7 +367,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -376,7 +383,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
         // -- execute --
         val result = orderService.getDetails(1L, "USC111")
-        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.uscId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -411,7 +418,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -457,7 +464,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -497,7 +504,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -518,7 +525,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             "USC111",
             "USCXUnitTest"
         )
-        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.uscId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -548,7 +555,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             mockAccount,
             mockAddress,
             mockCatalog,
-            OrderStatus.PENDING,
+            OrderStatus.PENDING_CONFIRMATION,
             2
         ).apply {
             this.uscId = "USC111"
@@ -569,7 +576,7 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
             "USC111",
             "USCXUnitTest"
         )
-        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.uscId).isEqualTo(mockOrder.uscId)
         assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
         assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
         assertThat(result.price).isEqualTo(expectedPrice)
@@ -580,6 +587,72 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         // -- verify --
         verify(mockAccountService).get(any<Long>())
         verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `confirm, success WITHOUT voucher code`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockOrder = Order(mockAccount, mockAddress, mockCatalog, OrderStatus.PENDING_CONFIRMATION, 1).apply {
+            this.id = 1
+            this.uscId = "USC111"
+        }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        assertAll({
+            orderService.confirm(
+                1L,
+                "USCID11",
+                TransactionMethod.CASH_ON_DELIVERY,
+                null
+            )
+        })
+
+        // -- verify --
+        verify(mockVoucherService, never()).get(any<String>())
+        verify(mockOrderRepository).save(any<Order>())
+        verify(mockOrderEventPublisher).publish(any<EventNewTransactionRequest>())
+    }
+
+    @Test
+    fun `confirm, success WITH voucher code`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockOrder = Order(mockAccount, mockAddress, mockCatalog, OrderStatus.PENDING_CONFIRMATION, 2).apply {
+            this.id = 1
+            this.uscId = "USC111"
+        }
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.FREE_PAIR,
+            AmountType.AMOUNT,
+            BigDecimal(1),
+            OffsetDateTime.now()
+        )
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+
+        // -- execute --
+        assertAll({
+            orderService.confirm(
+                1L,
+                "USCID11",
+                TransactionMethod.CASH_ON_DELIVERY,
+                "VOUCHX1"
+            )
+        })
+
+        // -- verify --
+        verify(mockVoucherService).get(any<String>())
+        verify(mockOrderRepository).save(any<Order>())
+        verify(mockOrderEventPublisher).publish(any<EventNewTransactionRequest>())
     }
 
     private fun createMockAddress(): Address {

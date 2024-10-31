@@ -14,11 +14,11 @@ import java.math.BigDecimal
  * @since 2024-10-30
  */
 fun Order.toSubmitOrderResponse(): SubmitOrderResponse {
-    val orderId = this.uscId
+    val uscId = this.uscId
     // -- validate the field orderId --
-    requireNotNull(orderId) { "Order ID must not be null" }
+    requireNotNull(uscId) { "USC ID must not be null" }
     // -- return the instance --
-    return SubmitOrderResponse(orderId)
+    return SubmitOrderResponse(uscId)
 }
 
 /**
@@ -28,9 +28,9 @@ fun Order.toSubmitOrderResponse(): SubmitOrderResponse {
  * @return the [OrderDetailResponse].
  */
 fun Order.toOrderDetailResponse(voucher: Voucher?): OrderDetailResponse {
-    val orderId = this.uscId
+    val uscId = this.uscId
     // -- validate the field orderId --
-    requireNotNull(orderId) { "Order ID must not be null" }
+    requireNotNull(uscId) { "USC ID must not be null" }
 
     val totalPairs = this.totalPairs
     val price = this.catalog.price
@@ -42,7 +42,7 @@ fun Order.toOrderDetailResponse(voucher: Voucher?): OrderDetailResponse {
     val totalAmount = subtotal.subtract(discount)
 
     return OrderDetailResponse(
-        orderId = orderId,
+        uscId = uscId,
         address = this.address.toResponse(),
         totalPairs = totalPairs,
         serviceType = this.catalog.serviceType,

@@ -7,7 +7,8 @@ package id.shoeclean.engine.orders
  * @since 2024-10-26
  */
 enum class OrderStatus {
-    PENDING,
+    PENDING, // Order created and confirmed by user, waiting for backoffice moving the status
+    PENDING_CONFIRMATION, // Order created but not confirmed by user
     ON_PICKUP,
     ON_DELIVERY,
     CLEANING,
