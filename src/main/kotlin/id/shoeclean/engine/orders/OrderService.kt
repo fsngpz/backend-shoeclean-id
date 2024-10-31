@@ -5,6 +5,8 @@ import id.shoeclean.engine.addresses.AddressService
 import id.shoeclean.engine.catalogs.CatalogService
 import id.shoeclean.engine.catalogs.ServiceType
 import id.shoeclean.engine.exceptions.OrderNotFoundException
+import id.shoeclean.engine.vouchers.Voucher
+import id.shoeclean.engine.vouchers.VoucherService
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
@@ -19,6 +21,7 @@ class OrderService(
     private val accountService: AccountService,
     private val addressService: AddressService,
     private val catalogService: CatalogService,
+    private val voucherService: VoucherService,
     private val orderSneakerService: OrderSneakerService,
     private val orderRepository: OrderRepository
 ) {
@@ -80,6 +83,22 @@ class OrderService(
     fun getDetails(accountId: Long, uscId: String): OrderDetailResponse {
         val order = get(accountId, uscId)
         // -- map and return the details of Order --
-        return order.toOrderDetailResponse()
+        return order.toOrderDetailResponse(order.voucher)
+    }
+
+    /**
+     * a function to get the [OrderDetailResponse] of a specific [Order] with given voucher code.
+     *
+     * @param accountId the account unique identifier.
+     * @param uscId the urban sneaker care unique identifier.
+     * @param voucherCode the code of [Voucher].
+     * @return the [OrderDetailResponse] instance.
+     */
+    fun applyVoucher(accountId: Long, uscId: String, voucherCode: String): OrderDetailResponse {
+        val order = get(accountId, uscId)
+        // -- get the voucher --
+        val voucher = voucherService.get(voucherCode)
+        // -- map and return the details of Order with Voucher --
+        return order.toOrderDetailResponse(voucher)
     }
 }

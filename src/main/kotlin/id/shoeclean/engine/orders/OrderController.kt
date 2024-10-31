@@ -22,6 +22,44 @@ import org.springframework.web.bind.annotation.RestController
 class OrderController(private val orderService: OrderService) {
 
     /**
+     * a GET mapping to handle retrieving the [OrderDetailResponse].
+     *
+     * @param uscId the urban sneaker care order unique identifier.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return the [OrderDetailResponse] instance.
+     */
+    @GetMapping("/{uscId}")
+    @Operation(summary = "Get details order by id")
+    fun get(
+        @PathVariable uscId: String,
+        httpServletRequest: HttpServletRequest
+    ): OrderDetailResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- get the details of order --
+        return orderService.getDetails(accountId, uscId)
+    }
+
+    /**
+     * a GET mapping to handle retrieving the [OrderDetailResponse] using the voucher code.
+     *
+     * @param uscId the urban sneaker care order unique identifier.
+     * @param voucherCode the voucher code.
+     * @param httpServletRequest the [HttpServletRequest] instance.
+     * @return the [OrderDetailResponse] instance.
+     */
+    @GetMapping("/{uscId}/{voucherCode}")
+    @Operation(summary = "Get the details order by usc id with voucher code")
+    fun applyVoucher(
+        @PathVariable uscId: String,
+        @PathVariable voucherCode: String,
+        httpServletRequest: HttpServletRequest
+    ): OrderDetailResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- get the details of order using the voucher code--
+        return orderService.applyVoucher(accountId, uscId, voucherCode)
+    }
+
+    /**
      * a POST mapping to handle creating new [Order].
      *
      * @param request the [OrderRequest] instance.
@@ -56,20 +94,5 @@ class OrderController(private val orderService: OrderService) {
             request.serviceType,
             request.totalPairs
         )
-    }
-
-    /**
-     * a GET mapping to handle retrieving the [OrderDetailResponse].
-     *
-     * @param uscId the urban sneaker care order unique identifier.
-     * @param httpServletRequest the [HttpServletRequest].
-     * @return the [OrderDetailResponse] instance.
-     */
-    @GetMapping("/{uscId}")
-    @Operation(summary = "Get details order by id")
-    fun get(@PathVariable uscId: String, httpServletRequest: HttpServletRequest): OrderDetailResponse {
-        val accountId = httpServletRequest.getHeader("ID").toLong()
-        // -- get the details of order --
-        return orderService.getDetails(accountId, uscId)
     }
 }

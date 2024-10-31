@@ -3,6 +3,7 @@ package id.shoeclean.engine.orders
 import id.shoeclean.engine.addresses.toResponse
 import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
 import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
+import id.shoeclean.engine.vouchers.Voucher
 import id.shoeclean.engine.vouchers.VoucherType
 import java.math.BigDecimal
 
@@ -26,7 +27,7 @@ fun Order.toSubmitOrderResponse(): SubmitOrderResponse {
  *
  * @return the [OrderDetailResponse].
  */
-fun Order.toOrderDetailResponse(): OrderDetailResponse {
+fun Order.toOrderDetailResponse(voucher: Voucher?): OrderDetailResponse {
     val orderId = this.uscId
     // -- validate the field orderId --
     requireNotNull(orderId) { "Order ID must not be null" }
@@ -34,7 +35,7 @@ fun Order.toOrderDetailResponse(): OrderDetailResponse {
     val totalPairs = this.totalPairs
     val price = this.catalog.price
 
-    val discount = this.getDiscount()
+    val discount = this.getDiscount(voucher)
     // get the subtotal from price * totalPairs
     val subtotal = price.multiply(BigDecimal(totalPairs))
     // get the totalAmount from subtotal - discount
@@ -59,8 +60,7 @@ fun Order.toOrderDetailResponse(): OrderDetailResponse {
  *
  * @return the [BigDecimal].
  */
-fun Order.getDiscount(): BigDecimal {
-    val voucher = this.voucher
+fun Order.getDiscount(voucher: Voucher?): BigDecimal {
     val price = this.catalog.price
     val totalPairs = BigDecimal(this.totalPairs)
     requireNotNull(voucher) {

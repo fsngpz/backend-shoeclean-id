@@ -12,6 +12,7 @@ import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
 import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
 import id.shoeclean.engine.vouchers.AmountType
 import id.shoeclean.engine.vouchers.Voucher
+import id.shoeclean.engine.vouchers.VoucherService
 import id.shoeclean.engine.vouchers.VoucherType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -48,6 +49,9 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
 
     @MockBean
     private lateinit var mockOrderSneakerService: OrderSneakerService
+
+    @MockBean
+    private lateinit var mockVoucherService: VoucherService
 
     @MockBean
     private lateinit var mockOrderRepository: OrderRepository
@@ -385,6 +389,199 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
     }
 
+    /**
+     * This test will throw an exception because the total pairs of order is 2 while the voucher amount is 3 with
+     * type [VoucherType.FREE_PAIR].
+     *
+     */
+    @Test
+    fun `applyVoucher, total pairs not suffice the voucher amount`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = mock<Address>()
+        val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.FREE_PAIR,
+            AmountType.AMOUNT,
+            BigDecimal(3),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.uscId = "USC111"
+        }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
+
+        // -- execute --
+        assertThrows<VoucherNotSufficeOrderQtyException> {
+            orderService.applyVoucher(
+                1L,
+                "USC111",
+                "USCXUnitTest"
+            )
+        }
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
+    }
+
+    /**
+     * This test will throw an exception because the subtotal of order is 30_000 while the voucher amount is 50_000 with
+     * type [VoucherType.DISCOUNT].
+     *
+     */
+    @Test
+    fun `applyVoucher, subtotal not suffice the voucher amount`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = mock<Address>()
+        val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.DISCOUNT,
+            AmountType.AMOUNT,
+            BigDecimal(50_000),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.uscId = "USC111"
+        }
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
+
+        // -- execute --
+        assertThrows<VoucherNotSufficeOrderSubtotalException> {
+            orderService.applyVoucher(
+                1L,
+                "USC111",
+                "USCXUnitTest"
+            )
+        }
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `applyVoucher, with free pair voucher`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.FREE_PAIR,
+            AmountType.AMOUNT,
+            BigDecimal(1),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.uscId = "USC111"
+        }
+
+        val expectedPrice = mockCatalog.price
+        val expectedDiscount = mockCatalog.price.multiply(mockVoucher.amount)
+        val expectedSubtotal = mockCatalog.price.multiply(BigDecimal(mockOrder.totalPairs))
+        val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
+
+        // -- execute --
+        val result = orderService.applyVoucher(
+            1L,
+            "USC111",
+            "USCXUnitTest"
+        )
+        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
+        assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
+        assertThat(result.price).isEqualTo(expectedPrice)
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+        assertThat(result.subtotal).isEqualTo(expectedSubtotal)
+        assertThat(result.totalAmount).isEqualTo(expectedTotalAmount)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
+    }
+
+    @Test
+    fun `applyVoucher, with discount voucher`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val mockCatalog = Catalog(ServiceType.DEEP_CLEANING, "Test", BigDecimal("15000"))
+        val mockVoucher = Voucher(
+            "TEST",
+            VoucherType.DISCOUNT,
+            AmountType.AMOUNT,
+            BigDecimal(10_000),
+            OffsetDateTime.now()
+        )
+
+        val mockOrder = Order(
+            mockAccount,
+            mockAddress,
+            mockCatalog,
+            OrderStatus.PENDING,
+            2
+        ).apply {
+            this.uscId = "USC111"
+        }
+
+        val expectedPrice = mockCatalog.price
+        val expectedDiscount = mockVoucher.amount
+        val expectedSubtotal = mockCatalog.price.multiply(BigDecimal(mockOrder.totalPairs))
+        val expectedTotalAmount = expectedSubtotal.subtract(expectedDiscount)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
+        whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
+
+        // -- execute --
+        val result = orderService.applyVoucher(
+            1L,
+            "USC111",
+            "USCXUnitTest"
+        )
+        assertThat(result.orderId).isEqualTo(mockOrder.uscId)
+        assertThat(result.totalPairs).isEqualTo(mockOrder.totalPairs)
+        assertThat(result.serviceType).isEqualTo(mockCatalog.serviceType)
+        assertThat(result.price).isEqualTo(expectedPrice)
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+        assertThat(result.subtotal).isEqualTo(expectedSubtotal)
+        assertThat(result.totalAmount).isEqualTo(expectedTotalAmount)
+
+        // -- verify --
+        verify(mockAccountService).get(any<Long>())
+        verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())
+    }
+
     private fun createMockAddress(): Address {
         val mockAccount = mock<Account>()
         val label = "My House"
@@ -398,3 +595,4 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         }
     }
 }
+
