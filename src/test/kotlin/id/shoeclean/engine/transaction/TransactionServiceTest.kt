@@ -4,6 +4,7 @@ import id.shoeclean.engine.orders.Order
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -11,7 +12,11 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.math.BigDecimal
+import java.time.OffsetDateTime
 
 /**
  * The test class of [TransactionService].
@@ -54,5 +59,74 @@ class TransactionServiceTest(@Autowired private val transactionService: Transact
         verify(mockTransactionRepository).save(captor.capture())
         val captured = captor.firstValue
         assertThat(captured).isNotNull
+    }
+
+    @Test
+    fun `findAll, return empty`() {
+        // -- mock --
+        whenever(
+            mockTransactionRepository.findAll(
+                any<Long>(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                any<Pageable>()
+            )
+        ).thenReturn(Page.empty())
+
+        // -- execute --
+        val result = transactionService.findAll(1L, null, null, null, Pageable.unpaged())
+        assertThat(result).isEmpty()
+
+        // -- verify --
+        val captorCreatedAtFrom = argumentCaptor<OffsetDateTime>()
+        val captorCreatedAtTo = argumentCaptor<OffsetDateTime>()
+        verify(mockTransactionRepository).findAll(
+            any<Long>(),
+            anyOrNull(),
+            captorCreatedAtFrom.capture(),
+            captorCreatedAtTo.capture(),
+            any<Pageable>()
+        )
+        val capturedCreatedAtFrom = captorCreatedAtFrom.firstValue
+        val capturedCreatedAtTo = captorCreatedAtTo.firstValue
+        assertThat(capturedCreatedAtFrom).isNotNull
+        assertThat(capturedCreatedAtTo).isNotNull
+    }
+
+    @Test
+    fun `findAll, success with data`() {
+        val mockTransactionOne = mock<Transaction>()
+        val mockTransactionTwo = mock<Transaction>()
+        val mockTransactionThree = mock<Transaction>()
+        // -- mock --
+        whenever(
+            mockTransactionRepository.findAll(
+                any<Long>(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                any<Pageable>()
+            )
+        ).thenReturn(PageImpl(listOf(mockTransactionOne, mockTransactionTwo, mockTransactionThree)))
+
+        // -- execute --
+        val result = transactionService.findAll(1L, null, null, null, Pageable.unpaged())
+        assertThat(result).isNotEmpty.hasSize(3)
+
+        // -- verify --
+        val captorCreatedAtFrom = argumentCaptor<OffsetDateTime>()
+        val captorCreatedAtTo = argumentCaptor<OffsetDateTime>()
+        verify(mockTransactionRepository).findAll(
+            any<Long>(),
+            anyOrNull(),
+            captorCreatedAtFrom.capture(),
+            captorCreatedAtTo.capture(),
+            any<Pageable>()
+        )
+        val capturedCreatedAtFrom = captorCreatedAtFrom.firstValue
+        val capturedCreatedAtTo = captorCreatedAtTo.firstValue
+        assertThat(capturedCreatedAtFrom).isNotNull
+        assertThat(capturedCreatedAtTo).isNotNull
     }
 }

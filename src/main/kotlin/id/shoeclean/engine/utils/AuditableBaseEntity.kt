@@ -20,9 +20,9 @@ import java.time.OffsetDateTime
 @EntityListeners(AuditingEntityListener::class)
 abstract class AuditableBaseEntity(
     @CreatedBy
-    var creatorId: String? = null,
+    var creatorId: String = "SYSTEM",
     @CreationTimestamp
-    var createdAt: OffsetDateTime? = null,
+    var createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @LastModifiedBy
     var updaterId: String? = null,
