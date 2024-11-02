@@ -4,7 +4,7 @@ FROM eclipse-temurin:21 AS build
 WORKDIR /app
 
 # Copy Gradle files
-COPY build.gradle settings.gradle gradlew /app/
+COPY build.gradle.kts settings.gradle.kts gradlew /app/
 COPY gradle /app/gradle
 
 # Download dependencies (this helps with caching)
