@@ -43,8 +43,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
-        run: docker build -t fsngpz/usc-engine-image:latest
+      - name: Build Docker Image
+        run: docker build -t fsngpz/usc-engine-image:latest .
 
       - name: Push Docker image to registry
         run: docker push fsngpz/usc-engine-image:latest
