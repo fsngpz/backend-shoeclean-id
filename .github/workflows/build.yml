@@ -44,7 +44,18 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build Docker Image
-        run: docker build -t fsngpz/usc-engine-image:latest .
+        run: docker build -t usc/usc-engine-image:latest .
 
       - name: Push Docker image to registry
-        run: docker push fsngpz/usc-engine-image:latest
+        run: docker push usc/usc-engine-image:latest
+
+  deploy:
+    needs: build
+    runs-on: [ aws-ec2 ]
+    steps:
+      - name: Pull image from docker hub
+        run: docker pull in usc/usc-engine-image:latest
+      - name: Delete previous docker container
+        run: docker rm -f usc-engine
+      - name: Run docker container
+        run: docker run -d -p 9090:9090 --name usc-engine usc/usc-engine-image:latest
