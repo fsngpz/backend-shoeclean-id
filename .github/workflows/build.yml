@@ -51,10 +51,10 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: self-hosted
+    runs-on: [ usc-ec2 ]
     steps:
       - name: Pull image from docker hub
-        run: docker pull in fsngpz/usc-engine-image:latest
+        run: docker pull fsngpz/usc-engine-image:latest
       - name: Delete previous docker container
         run: docker rm -f usc-engine
       - name: Run docker container
