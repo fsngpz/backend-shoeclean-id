@@ -50,12 +50,13 @@ jobs:
         run: docker push fsngpz/usc-engine-image:latest
 
   deploy:
+    name: Deploy to dev
     needs: build
     runs-on: [ usc-ec2 ]
     steps:
       - name: Pull image from docker hub
-        run: docker pull fsngpz/usc-engine-image:latest
+        run: sudo docker pull fsngpz/usc-engine-image:latest
       - name: Delete previous docker container
-        run: docker rm -f usc-engine
+        run: sudo docker rm -f usc-engine
       - name: Run docker container
-        run: docker run -d -p 9090:9090 --name usc-engine fsngpz/usc-engine-image:latest
+        run: sudo docker run -d -p 9090:9090 --name usc-engine fsngpz/usc-engine-image:latest SPRING_PROFILES_ACTIVE=dev
