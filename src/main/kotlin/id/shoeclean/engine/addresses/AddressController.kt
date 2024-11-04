@@ -1,5 +1,6 @@
 package id.shoeclean.engine.addresses
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
@@ -10,6 +11,7 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -56,7 +58,7 @@ class AddressController(private val addressService: AddressService) {
     @Operation(summary = "Find All Address using Filter")
     fun findAll(
         @RequestParam filter: String?,
-        @PageableDefault(sort = ["brand"], direction = Sort.Direction.ASC) pageable: Pageable,
+        @PageableDefault(sort = ["label"], direction = Sort.Direction.ASC) pageable: Pageable,
         httpServletRequest: HttpServletRequest
     ): Page<AddressResponse> {
         val accountId = httpServletRequest.getHeader("ID").toLong()
@@ -67,44 +69,47 @@ class AddressController(private val addressService: AddressService) {
     /**
      * a POST mapping to handle request create new [Address].
      *
-     * @param request the [AddressRequest] instance.
+     * @param request the [AddressRequestNullable] instance.
      * @param httpServletRequest the [HttpServletRequest].
      * @return the [AddressResponse].
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create new address")
-    fun create(@RequestBody request: AddressRequest, httpServletRequest: HttpServletRequest): AddressResponse {
+    fun create(@RequestBody request: AddressRequestNullable, httpServletRequest: HttpServletRequest): AddressResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
-        // -- validate the request body --
-        requireNotNull(request.label) {
-            "field label cannot be null"
-        }
-        requireNotNull(request.line) {
-            "field line cannot be null"
-        }
-        requireNotNull(request.city) {
-            "field city cannot be null"
-        }
-        requireNotNull(request.district) {
-            "field district cannot be null"
-        }
-        requireNotNull(request.subdistrict) {
-            "field subdistrict cannot be null"
-        }
-        requireNotNull(request.state) {
-            "field state cannot be null"
-        }
+        // -- convert the Nullable request to Non Nullable --
+        val nonNullRequest = request.toRequest()
         // -- create the new address --
         return addressService.create(
             accountId,
-            request.label,
-            request.line,
-            request.city,
-            request.district,
-            request.subdistrict,
-            request.subdistrict
+            nonNullRequest.label,
+            nonNullRequest.line,
+            nonNullRequest.city,
+            nonNullRequest.district,
+            nonNullRequest.subdistrict,
+            nonNullRequest.state
         )
+    }
+
+    /**
+     * a PATCH mapping to handle request update partial the [Address].
+     *
+     * @param id the address unique identifier.
+     * @param request the [JsonNode] as a request body.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return
+     */
+    @PatchMapping("/{id}")
+    @Operation(summary = "Patch / Partial Update a specific address")
+    fun patch(
+        @PathVariable id: Long,
+        @RequestBody request: JsonNode,
+        httpServletRequest: HttpServletRequest
+    ): AddressResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- do patching of the Address --
+        return addressService.patch(accountId, id, request).toResponse()
     }
 
     /**

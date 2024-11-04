@@ -1,5 +1,7 @@
 package id.shoeclean.engine.addresses
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import id.shoeclean.engine.accounts.AccountService
 import id.shoeclean.engine.exceptions.AddressNotFoundException
 import org.springframework.data.domain.Page
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class AddressService(
+    private val objectMapper: ObjectMapper,
     private val accountService: AccountService,
     private val addressRepository: AddressRepository
 ) {
@@ -76,6 +79,53 @@ class AddressService(
         addressRepository.save(address)
         // -- map and return --
         return address.toResponse()
+    }
+
+
+    /**
+     * a function to handle update of [Address] instance.
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     * @param request the [AddressRequestNullable] instance.
+     * @return the [Address] instance.
+     */
+    fun put(accountId: Long, addressId: Long, request: AddressRequestNullable): Address {
+        // -- convert the Nullable request to Non Nullable --
+        val nonNullRequest = request.toRequest()
+        // -- get the Address in database then update --
+        val address = get(accountId, addressId).apply {
+            this.label = nonNullRequest.label
+            this.line = nonNullRequest.line
+            this.city = nonNullRequest.city
+            this.district = nonNullRequest.district
+            this.subdistrict = nonNullRequest.subdistrict
+            this.state = nonNullRequest.state
+            this.isSelected = nonNullRequest.isSelected
+        }
+        // -- save and return the instance --
+        return addressRepository.save(address)
+    }
+
+    /**
+     * a function to patch / partial update to [Address].
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     * @param request the [JsonNode] as a request body.
+     * @return the [Address] instance.
+     */
+    fun patch(accountId: Long, addressId: Long, request: JsonNode): Address {
+        // -- get the instance Address --
+        val address = get(accountId, addressId)
+        // -- convert the Address instance to AddressRequestNullable --
+        val body = address.toRequestNullable()
+        // -- read object value to update --
+        val reader = objectMapper.readerForUpdating(body)
+        // -- convert the request to AddressRequestNullable --
+        val updatedAddress = reader.readValue<AddressRequestNullable>(request)
+        // -- do an update --
+        return put(accountId, addressId, updatedAddress)
     }
 
     /**

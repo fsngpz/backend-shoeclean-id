@@ -4,13 +4,14 @@ package id.shoeclean.engine.addresses
  * The model class represent the request of [Address].
  *
  * @author Ferdinand Sangap.
- * @since 2024-10-25
+ * @since 2024-11-04
  */
 data class AddressRequest(
-    val label: String? = null,
-    val line: String? = null,
-    val city: String? = null,
-    val district: String? = null,
-    val subdistrict: String? = null,
-    val state: String? = null,
+    val label: String,
+    val line: String,
+    val city: String,
+    val district: String,
+    val subdistrict: String,
+    val state: String,
+    val isSelected: Boolean
 )

@@ -29,4 +29,6 @@ class Address(
     var district: String,
     var subdistrict: String,
     var state: String
-) : AuditableBaseEntity()
+) : AuditableBaseEntity() {
+    var isSelected: Boolean = false
+}

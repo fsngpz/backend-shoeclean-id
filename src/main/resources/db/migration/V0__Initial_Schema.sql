@@ -133,12 +133,14 @@ CREATE TABLE addresses
     district            text                                               NOT NULL,
     subdistrict         text                                               NOT NULL,
     state               text                                               NOT NULL,
+    is_selected         boolean                  DEFAULT FALSE             NOT NULL,
     created_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     creator_id          text                                               NOT NULL,
     updated_at          timestamp WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
+CREATE UNIQUE INDEX unique_account_selected_address ON addresses (account_id) WHERE is_selected = TRUE;
 
 /*
  * Catalog
