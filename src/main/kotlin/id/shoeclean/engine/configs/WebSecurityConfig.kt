@@ -78,7 +78,11 @@ class WebSecurityConfig(
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")
-                    .allowedOriginPatterns(CorsConfiguration.ALL)
+                    .allowedOriginPatterns(
+                        "*.urbansolecare.com",
+                        "http://localhost:3000",
+                        "http://localhost:4173"
+                    )
                     .allowedMethods(CorsConfiguration.ALL)
                     .allowedHeaders(CorsConfiguration.ALL)
             }
