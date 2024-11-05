@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector
@@ -44,6 +45,7 @@ class WebSecurityConfig(
     @Bean
     fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
         return httpSecurity
+            .cors { }
             .csrf { it.disable() }
             .exceptionHandling {
                 it.authenticationEntryPoint(authEntryPoint)
@@ -75,7 +77,10 @@ class WebSecurityConfig(
     fun corsConfigurer(): WebMvcConfigurer {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
-                registry.addMapping("/**").allowedOrigins("*").allowedMethods("*").allowedHeaders("*")
+                registry.addMapping("/**")
+                    .allowedOriginPatterns(CorsConfiguration.ALL)
+                    .allowedMethods(CorsConfiguration.ALL)
+                    .allowedHeaders(CorsConfiguration.ALL)
             }
         }
     }
