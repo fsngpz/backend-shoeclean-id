@@ -75,7 +75,7 @@ class WebSecurityConfig(
     fun corsConfigurer(): WebMvcConfigurer {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
-                registry.addMapping("/**").allowedOrigins("*").allowedMethods("*")
+                registry.addMapping("/**").allowedOrigins("*").allowedMethods("*").allowedHeaders("*")
             }
         }
     }
