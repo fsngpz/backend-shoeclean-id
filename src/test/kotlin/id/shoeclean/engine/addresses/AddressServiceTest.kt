@@ -323,7 +323,7 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
         assertThat(captured.district).isEqualTo(mockAddress.district)
         assertThat(captured.subdistrict).isEqualTo(mockAddress.subdistrict)
         assertThat(captured.state).isEqualTo(mockAddress.state)
-        assertThat(captured.isSelected).isFalse
+        assertThat(captured.isMainAddress).isFalse
         // -- verify --
         verify(mockAddressRepository).findByIdAndAccount(any<Long>(), any<Account>())
     }
@@ -359,7 +359,7 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
         assertThat(captured.district).isEqualTo(mockAddress.district)
         assertThat(captured.subdistrict).isEqualTo(mockAddress.subdistrict)
         assertThat(captured.state).isEqualTo(mockAddress.state)
-        assertThat(captured.isSelected).isTrue()
+        assertThat(captured.isMainAddress).isTrue()
         // -- verify --
         verify(mockAddressRepository, atLeastOnce()).findByIdAndAccount(any<Long>(), any<Account>())
     }

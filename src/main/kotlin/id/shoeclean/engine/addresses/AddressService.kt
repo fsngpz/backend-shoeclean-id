@@ -101,7 +101,7 @@ class AddressService(
             this.district = nonNullRequest.district
             this.subdistrict = nonNullRequest.subdistrict
             this.state = nonNullRequest.state
-            this.isSelected = nonNullRequest.isSelected
+            this.isMainAddress = nonNullRequest.isMainAddress
         }
         // -- save and return the instance --
         return addressRepository.save(address)

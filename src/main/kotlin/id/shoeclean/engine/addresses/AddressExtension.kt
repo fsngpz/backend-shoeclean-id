@@ -20,7 +20,7 @@ fun Address.toResponse(): AddressResponse {
         this.district,
         this.subdistrict,
         this.state,
-        this.isSelected
+        this.isMainAddress
     )
 }
 
@@ -37,7 +37,7 @@ fun Address.toRequestNullable(): AddressRequestNullable {
         district = this.district,
         subdistrict = this.subdistrict,
         state = this.state,
-        isSelected = this.isSelected
+        isSelected = this.isMainAddress
     )
 }
 
@@ -73,6 +73,6 @@ fun AddressRequestNullable.toRequest(): AddressRequest {
         district = this.district,
         subdistrict = this.subdistrict,
         state = this.state,
-        isSelected = this.isSelected ?: false
+        isMainAddress = this.isSelected ?: false
     )
 }
