@@ -1,7 +1,10 @@
 package id.shoeclean.engine.addresses
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import id.shoeclean.engine.accounts.AccountService
 import id.shoeclean.engine.exceptions.AddressNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class AddressService(
+    private val objectMapper: ObjectMapper,
     private val accountService: AccountService,
     private val addressRepository: AddressRepository
 ) {
@@ -29,6 +33,31 @@ class AddressService(
     fun findAll(accountId: Long, filter: String?, pageable: Pageable): Page<AddressResponse> {
         // -- find the data then map --
         return addressRepository.findAllByFilter(accountId, filter, pageable).map { it.toResponse() }
+    }
+
+    /**
+     * a function to set the main address with given address id.
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     */
+    @Transactional
+    fun setMainAddress(accountId: Long, addressId: Long) {
+        // -- get the account --
+        val account = accountService.get(accountId)
+        // -- find all address with given account --
+        val addresses = addressRepository.findAllByAccount(account)
+        // -- iterate the address to set the isMainAddress to false --
+        addresses.forEach {
+            it.isMainAddress = false
+            // -- check is the address id match the id --
+            // -- if so, the set the main address to true --
+            if (addressId == it.id) {
+                it.isMainAddress = true
+            }
+        }
+        // -- save address instance --
+        addressRepository.saveAll(addresses)
     }
 
     /**
@@ -76,6 +105,53 @@ class AddressService(
         addressRepository.save(address)
         // -- map and return --
         return address.toResponse()
+    }
+
+
+    /**
+     * a function to handle update of [Address] instance.
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     * @param request the [AddressRequestNullable] instance.
+     * @return the [Address] instance.
+     */
+    fun put(accountId: Long, addressId: Long, request: AddressRequestNullable): Address {
+        // -- convert the Nullable request to Non Nullable --
+        val nonNullRequest = request.toRequest()
+        // -- get the Address in database then update --
+        val address = get(accountId, addressId).apply {
+            this.label = nonNullRequest.label
+            this.line = nonNullRequest.line
+            this.city = nonNullRequest.city
+            this.district = nonNullRequest.district
+            this.subdistrict = nonNullRequest.subdistrict
+            this.state = nonNullRequest.state
+            this.isMainAddress = nonNullRequest.isMainAddress
+        }
+        // -- save and return the instance --
+        return addressRepository.save(address)
+    }
+
+    /**
+     * a function to patch / partial update to [Address].
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     * @param request the [JsonNode] as a request body.
+     * @return the [Address] instance.
+     */
+    fun patch(accountId: Long, addressId: Long, request: JsonNode): Address {
+        // -- get the instance Address --
+        val address = get(accountId, addressId)
+        // -- convert the Address instance to AddressRequestNullable --
+        val body = address.toRequestNullable()
+        // -- read object value to update --
+        val reader = objectMapper.readerForUpdating(body)
+        // -- convert the request to AddressRequestNullable --
+        val updatedAddress = reader.readValue<AddressRequestNullable>(request)
+        // -- do an update --
+        return put(accountId, addressId, updatedAddress)
     }
 
     /**

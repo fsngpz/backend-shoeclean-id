@@ -13,5 +13,6 @@ data class AddressResponse(
     val city: String,
     val district: String,
     val subdistrict: String,
-    val state: String
+    val state: String,
+    val isMainAddress: Boolean
 )

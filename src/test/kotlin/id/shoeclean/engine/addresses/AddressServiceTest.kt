@@ -1,5 +1,6 @@
 package id.shoeclean.engine.addresses
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import id.shoeclean.engine.accounts.Account
 import id.shoeclean.engine.accounts.AccountService
 import id.shoeclean.engine.exceptions.AddressNotFoundException
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -16,10 +19,12 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import kotlin.random.Random
+
 
 /**
  * The test class for [AddressService].
@@ -28,6 +33,7 @@ import kotlin.random.Random
  * @since 2024-10-25
  */
 @SpringBootTest(classes = [AddressService::class])
+@Import(ObjectMapper::class)
 class AddressServiceTest(@Autowired private val addressService: AddressService) {
     @MockBean
     private lateinit var mockAccountService: AccountService
@@ -202,6 +208,195 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
         assertThat(result.state).isEqualTo(mockAddress.state)
         // -- verify --
         verify(mockAddressRepository).findByIdAndAccount(any<Long>(), any<Account>())
+    }
+
+    @Test
+    fun `put, exception thrown because there is a null value in request`() {
+        var request = AddressRequestNullable(
+            label = null,
+            line = null,
+            city = null,
+            district = null,
+            subdistrict = null,
+            state = null,
+            isSelected = null
+        )
+
+        // -- execute with label null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        request = AddressRequestNullable(
+            label = "Label",
+            line = null,
+            city = null,
+            district = null,
+            subdistrict = null,
+            state = null,
+            isSelected = null
+        )
+        // -- execute with line null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        request = AddressRequestNullable(
+            label = "Label",
+            line = "Line",
+            city = null,
+            district = null,
+            subdistrict = null,
+            state = null,
+            isSelected = null
+        )
+        // -- execute with city null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        request = AddressRequestNullable(
+            label = "Label",
+            line = "Line",
+            city = "City",
+            district = null,
+            subdistrict = null,
+            state = null,
+            isSelected = null
+        )
+        // -- execute with district null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        request = AddressRequestNullable(
+            label = "Label",
+            line = "Line",
+            city = "City",
+            district = "District",
+            subdistrict = null,
+            state = null,
+            isSelected = null
+        )
+        // -- execute with subdistrict null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        request = AddressRequestNullable(
+            label = "Label",
+            line = "Line",
+            city = "City",
+            district = "District",
+            subdistrict = "Subdistrict",
+            state = null,
+            isSelected = null
+        )
+        // -- execute with state null --
+        assertThrows<IllegalArgumentException> { addressService.put(1L, 2L, request) }
+
+        // -- verify --
+        verify(mockAddressRepository, never()).findByIdAndAccount(any<Long>(), any<Account>())
+        verify(mockAddressRepository, never()).save(any<Address>())
+    }
+
+    @Test
+    fun `put, success`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val request = AddressRequestNullable(
+            label = "Label",
+            line = "Line",
+            city = "City",
+            district = "District",
+            subdistrict = "Subdistrict",
+            state = "State",
+            isSelected = null
+        )
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockAddressRepository.findByIdAndAccount(any<Long>(), any<Account>())).thenReturn(mockAddress)
+        whenever(mockAddressRepository.save(any<Address>())).thenReturn(mockAddress)
+
+        // -- execute --
+        val result = addressService.put(1L, 2L, request)
+        assertThat(result.javaClass).isEqualTo(Address::class.java)
+
+        // -- captor --
+        val captor = argumentCaptor<Address>()
+        verify(mockAddressRepository).save(captor.capture())
+        val captured = captor.firstValue
+
+        assertThat(captured.label).isEqualTo(mockAddress.label)
+        assertThat(captured.line).isEqualTo(mockAddress.line)
+        assertThat(captured.city).isEqualTo(mockAddress.city)
+        assertThat(captured.district).isEqualTo(mockAddress.district)
+        assertThat(captured.subdistrict).isEqualTo(mockAddress.subdistrict)
+        assertThat(captured.state).isEqualTo(mockAddress.state)
+        assertThat(captured.isMainAddress).isFalse
+        // -- verify --
+        verify(mockAddressRepository).findByIdAndAccount(any<Long>(), any<Account>())
+    }
+
+    @Test
+    fun `patch, success update isSelected`() {
+        val mockAccount = mock<Account>()
+        val mockAddress = createMockAddress()
+        val jsonString = """
+            {
+            "isSelected": true
+            }
+        """.trimIndent()
+        val mapper = ObjectMapper()
+        val request = mapper.readTree(jsonString)
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockAddressRepository.findByIdAndAccount(any<Long>(), any<Account>())).thenReturn(mockAddress)
+        whenever(mockAddressRepository.save(any<Address>())).thenReturn(mockAddress)
+
+        // -- execute --
+        val result = addressService.patch(1L, 2L, request)
+        assertThat(result.javaClass).isEqualTo(Address::class.java)
+
+        // -- captor --
+        val captor = argumentCaptor<Address>()
+        verify(mockAddressRepository).save(captor.capture())
+        val captured = captor.firstValue
+
+        assertThat(captured.label).isEqualTo(mockAddress.label)
+        assertThat(captured.line).isEqualTo(mockAddress.line)
+        assertThat(captured.city).isEqualTo(mockAddress.city)
+        assertThat(captured.district).isEqualTo(mockAddress.district)
+        assertThat(captured.subdistrict).isEqualTo(mockAddress.subdistrict)
+        assertThat(captured.state).isEqualTo(mockAddress.state)
+        assertThat(captured.isMainAddress).isTrue()
+        // -- verify --
+        verify(mockAddressRepository, atLeastOnce()).findByIdAndAccount(any<Long>(), any<Account>())
+    }
+
+    @Test
+    fun `setMainAddress, success`() {
+        val addressId = 2L
+        val mockAccount = mock<Account>()
+        val mockAddressOne = createMockAddress().apply { this.id = 1 }
+        val mockAddressTwo = createMockAddress().apply { this.id = 2 }
+        val mockAddressThree = createMockAddress().apply { this.id = 3 }
+
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockAddressRepository.findAllByAccount(any<Account>())).thenReturn(
+            listOf(
+                mockAddressOne,
+                mockAddressTwo,
+                mockAddressThree
+            )
+        )
+
+        // -- execute and verify --
+        assertAll({ addressService.setMainAddress(1L, addressId) })
+
+        // -- captor --
+        val captor = argumentCaptor<List<Address>>()
+        verify(mockAddressRepository).saveAll(captor.capture())
+        val captured = captor.firstValue
+
+        captured.forEach {
+            if (it.id == addressId) {
+                assertThat(it.isMainAddress).isTrue
+            } else {
+                assertThat(it.isMainAddress).isFalse
+            }
+        }
     }
 
     private fun createMockAddress(): Address {
