@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import id.shoeclean.engine.accounts.AccountService
 import id.shoeclean.engine.exceptions.AddressNotFoundException
+import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -32,6 +33,31 @@ class AddressService(
     fun findAll(accountId: Long, filter: String?, pageable: Pageable): Page<AddressResponse> {
         // -- find the data then map --
         return addressRepository.findAllByFilter(accountId, filter, pageable).map { it.toResponse() }
+    }
+
+    /**
+     * a function to set the main address with given address id.
+     *
+     * @param accountId the account unique identifier.
+     * @param addressId the address unique identifier.
+     */
+    @Transactional
+    fun setMainAddress(accountId: Long, addressId: Long) {
+        // -- get the account --
+        val account = accountService.get(accountId)
+        // -- find all address with given account --
+        val addresses = addressRepository.findAllByAccount(account)
+        // -- iterate the address to set the isMainAddress to false --
+        addresses.forEach {
+            it.isMainAddress = false
+            // -- check is the address id match the id --
+            // -- if so, the set the main address to true --
+            if (addressId == it.id) {
+                it.isMainAddress = true
+            }
+        }
+        // -- save address instance --
+        addressRepository.saveAll(addresses)
     }
 
     /**

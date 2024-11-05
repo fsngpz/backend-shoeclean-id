@@ -67,6 +67,21 @@ class AddressController(private val addressService: AddressService) {
     }
 
     /**
+     * a POST mapping to handle set the main address of user.
+     *
+     * @param addressId the address unique identifier.
+     * @param httpServletRequest the [HttpServletRequest].
+     */
+    @PostMapping("/main-address/{addressId}")
+    @Operation(summary = "Set the main address")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun setMainAddress(@PathVariable addressId: Long, httpServletRequest: HttpServletRequest) {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- set the main address --
+        return addressService.setMainAddress(accountId, addressId)
+    }
+
+    /**
      * a POST mapping to handle request create new [Address].
      *
      * @param request the [AddressRequestNullable] instance.

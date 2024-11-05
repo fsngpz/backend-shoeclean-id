@@ -364,6 +364,41 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
         verify(mockAddressRepository, atLeastOnce()).findByIdAndAccount(any<Long>(), any<Account>())
     }
 
+    @Test
+    fun `setMainAddress, success`() {
+        val addressId = 2L
+        val mockAccount = mock<Account>()
+        val mockAddressOne = createMockAddress().apply { this.id = 1 }
+        val mockAddressTwo = createMockAddress().apply { this.id = 2 }
+        val mockAddressThree = createMockAddress().apply { this.id = 3 }
+
+        // -- mock --
+        whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
+        whenever(mockAddressRepository.findAllByAccount(any<Account>())).thenReturn(
+            listOf(
+                mockAddressOne,
+                mockAddressTwo,
+                mockAddressThree
+            )
+        )
+
+        // -- execute and verify --
+        assertAll({ addressService.setMainAddress(1L, addressId) })
+
+        // -- captor --
+        val captor = argumentCaptor<List<Address>>()
+        verify(mockAddressRepository).saveAll(captor.capture())
+        val captured = captor.firstValue
+
+        captured.forEach {
+            if (it.id == addressId) {
+                assertThat(it.isMainAddress).isTrue
+            } else {
+                assertThat(it.isMainAddress).isFalse
+            }
+        }
+    }
+
     private fun createMockAddress(): Address {
         val mockAccount = mock<Account>()
         val label = "My House"

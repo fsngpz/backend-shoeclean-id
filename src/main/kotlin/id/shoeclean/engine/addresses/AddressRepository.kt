@@ -44,4 +44,12 @@ interface AddressRepository : JpaRepository<Address, Long> {
      * @return
      */
     fun findByIdAndAccount(id: Long, account: Account): Address?
+
+    /**
+     * a method to find all [Address] of a specific account.
+     *
+     * @param account the account instance.
+     * @return the list of [Address] instance.
+     */
+    fun findAllByAccount(account: Account): List<Address>
 }
