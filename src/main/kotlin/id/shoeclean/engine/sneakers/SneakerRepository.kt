@@ -43,9 +43,9 @@ interface SneakerRepository : JpaRepository<Sneaker, Long> {
     @Query(
         value = """
         FROM Sneaker s
-        WHERE s.account.id = :accountId
-        AND (:filter IS NULL OR s.brand = :filter)
-        OR (:filter IS NULL OR s.color = :filter)
+        WHERE (:filter IS NULL OR s.brand ILIKE concat('%', CAST(:filter AS string), '%')
+        OR :filter IS NULL OR s.color ILIKE concat('%', CAST(:filter AS string), '%'))
+        AND s.account.id = :accountId
     """
     )
     fun findAllByFilter(accountId: Long, filter: String?, pageable: Pageable): Page<Sneaker>

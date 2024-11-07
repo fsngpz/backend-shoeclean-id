@@ -25,13 +25,13 @@ interface AddressRepository : JpaRepository<Address, Long> {
     @Query(
         value = """
         FROM Address a
-        WHERE a.account.id = :accountId
-        AND (:filter IS NULL OR a.label = :filter)
-        OR (:filter IS NULL OR a.line = :filter)
-        OR (:filter IS NULL OR a.city = :filter)
-        OR (:filter IS NULL OR a.district = :filter)
-        OR (:filter IS NULL OR a.subdistrict = :filter)
-        OR (:filter IS NULL OR a.state = :filter)
+        WHERE (:filter IS NULL 
+        OR a.label ILIKE concat('%',CAST(:filter AS string),'%')
+        OR a.line ILIKE concat('%',CAST(:filter AS string),'%')
+        OR a.city ILIKE concat('%',CAST(:filter AS string),'%')
+        OR a.subdistrict ILIKE concat('%',CAST(:filter AS string),'%')
+        OR a.state ILIKE concat('%',CAST(:filter AS string),'%'))
+        AND a.account.id = :accountId
     """
     )
     fun findAllByFilter(accountId: Long, filter: String?, pageable: Pageable): Page<Address>
