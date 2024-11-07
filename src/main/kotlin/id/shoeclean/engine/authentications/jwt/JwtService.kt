@@ -20,7 +20,10 @@ import java.util.function.Function
  * @since 2024-10-21
  */
 @Component
-class JwtService(@Value("\${spring-auth.secret}") private val authSecret: String) {
+class JwtService(
+    @Value("\${spring-auth.secret}") private val authSecret: String,
+    @Value("\${jwt.expiry.millisecond}") private val jwtExpiryMs: Long
+) {
 
     /**
      * a function to do extraction of id from JWT Token.
@@ -133,7 +136,7 @@ class JwtService(@Value("\${spring-auth.secret}") private val authSecret: String
             .setSubject(email)
             .setId(id.toString())
             .setIssuedAt(Date(System.currentTimeMillis()))
-            .setExpiration(Date(System.currentTimeMillis() + THIRTY_MIN))
+            .setExpiration(Date(System.currentTimeMillis() + jwtExpiryMs))
             .signWith(getSignKey(), SignatureAlgorithm.HS256).compact()
     }
 
@@ -145,9 +148,5 @@ class JwtService(@Value("\${spring-auth.secret}") private val authSecret: String
     private fun getSignKey(): Key {
         val keyBytes: ByteArray = Decoders.BASE64.decode(authSecret)
         return Keys.hmacShaKeyFor(keyBytes)
-    }
-
-    companion object {
-        const val THIRTY_MIN = 1000 * 60 * 30
     }
 }
