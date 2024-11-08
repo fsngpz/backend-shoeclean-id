@@ -366,7 +366,7 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
 
     @Test
     fun `setMainAddress, success`() {
-        val addressId = 2L
+        val addressId = 1L
         val mockAccount = mock<Account>()
         val mockAddressOne = createMockAddress().apply { this.id = 1 }
         val mockAddressTwo = createMockAddress().apply { this.id = 2 }
@@ -381,6 +381,7 @@ class AddressServiceTest(@Autowired private val addressService: AddressService) 
                 mockAddressThree
             )
         )
+        whenever(mockAddressRepository.findByIdAndAccount(any<Long>(), any<Account>())).thenReturn(mockAddressOne)
 
         // -- execute and verify --
         assertAll({ addressService.setMainAddress(1L, addressId) })

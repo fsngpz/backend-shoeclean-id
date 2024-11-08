@@ -50,14 +50,15 @@ class AddressService(
         // -- iterate the address to set the isMainAddress to false --
         addresses.forEach {
             it.isMainAddress = false
-            // -- check is the address id match the id --
-            // -- if so, the set the main address to true --
-            if (addressId == it.id) {
-                it.isMainAddress = true
-            }
         }
-        // -- save address instance --
+        // -- save updated address instance --
         addressRepository.saveAll(addresses)
+        // -- find the address with given id --
+        val mainAddress = get(accountId, addressId).apply {
+            this.isMainAddress = true
+        }
+        // -- save the main address instance --
+        addressRepository.save(mainAddress)
     }
 
     /**
