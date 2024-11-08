@@ -72,7 +72,7 @@ class AddressController(private val addressService: AddressService) {
      * @param addressId the address unique identifier.
      * @param httpServletRequest the [HttpServletRequest].
      */
-    @PostMapping("/main-address/{addressId}")
+    @PostMapping("/main/{addressId}")
     @Operation(summary = "Set the main address")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun setMainAddress(@PathVariable addressId: Long, httpServletRequest: HttpServletRequest) {
