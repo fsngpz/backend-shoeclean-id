@@ -1,6 +1,7 @@
 package id.shoeclean.engine.accounts
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import id.shoeclean.engine.addresses.Address
 import id.shoeclean.engine.authentications.users.User
 import id.shoeclean.engine.exceptions.AccountNotFoundException
 import org.assertj.core.api.Assertions.assertThat
@@ -106,5 +107,43 @@ class AccountServiceTest(@Autowired private val accountService: AccountService) 
         verify(mockAccountRepository).save(captor.capture())
         val capturedAccount = captor.firstValue
         assertThat(capturedAccount.name).isEqualTo(name)
+    }
+
+    @Test
+    fun `getDetails, not found`() {
+        // -- mock --
+        whenever(mockAccountRepository.findById(any<Long>())).thenReturn(Optional.empty())
+
+        // -- execute and verify --
+        assertThrows<AccountNotFoundException> { accountService.get(1L) }
+    }
+
+    @Test
+    fun `getDetails, success`() {
+        val mockAccount = Account(user = User("example@mail.com", "pass")).apply {
+            this.id = 1L
+            this.name = "John Doe"
+            this.profilePictureUrl = "image.url"
+            this.address = Address(
+                this,
+                "Label",
+                "Line",
+                "City",
+                "District",
+                "Subdistrict",
+                "Indonesia"
+            ).apply { this.id = 1L }
+        }
+        // -- mock --
+        whenever(mockAccountRepository.findById(any<Long>())).thenReturn(Optional.of(mockAccount))
+
+        // -- execute and verify --
+        val result = accountService.getDetails(1L)
+        assertThat(result.name).isEqualTo(mockAccount.name)
+        assertThat(result.profilePictureUrl).isEqualTo(mockAccount.profilePictureUrl)
+        assertThat(result.email).isEqualTo(mockAccount.user.email)
+        assertThat(result.mobile).isEqualTo(mockAccount.user.mobile)
+        assertThat(result.isEmailVerified).isFalse()
+        assertThat(result.mainAddress).isNotNull
     }
 }

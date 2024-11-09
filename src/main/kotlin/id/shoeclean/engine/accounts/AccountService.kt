@@ -31,6 +31,19 @@ class AccountService(private val accountRepository: AccountRepository, private v
     }
 
     /**
+     * a function to handle request get the [Account] details.
+     *
+     * @param id the account unique identifier.
+     * @return the [AccountDetailsResponse] instance.
+     */
+    fun getDetails(id: Long): AccountDetailsResponse {
+        // -- get the account --
+        val account = get(id)
+        // -- map to AccountDetailsResponse and return --
+        return account.toDetailsResponse()
+    }
+
+    /**
      * a function to handle request create new [Account] instance.
      *
      * @param user the [User] instance.

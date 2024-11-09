@@ -1,5 +1,6 @@
 package id.shoeclean.engine.accounts
 
+import id.shoeclean.engine.addresses.Address
 import id.shoeclean.engine.authentications.users.User
 import id.shoeclean.engine.notifications.NotificationLog
 import id.shoeclean.engine.utils.AuditableBaseEntity
@@ -34,4 +35,7 @@ class Account(
     @OneToMany(mappedBy = "account")
     @OnDelete(action = OnDeleteAction.CASCADE)
     var notificationLogs: Set<NotificationLog> = setOf()
+
+    @OneToOne(mappedBy = "account")
+    var address: Address? = null
 }
