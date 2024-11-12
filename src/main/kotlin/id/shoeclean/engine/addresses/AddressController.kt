@@ -1,8 +1,6 @@
 package id.shoeclean.engine.addresses
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -28,8 +26,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 @RestController
 @RequestMapping("/v1/addresses")
-@Tag(name = "Addresses API")
-class AddressController(private val addressService: AddressService) {
+class AddressController(private val addressService: AddressService) : AddressSwaggerController {
 
     /**
      * a GET mapping to handle retrieving the address by given unique identifier.
@@ -39,8 +36,7 @@ class AddressController(private val addressService: AddressService) {
      * @return the [AddressResponse] instance.
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Get a specific address by id")
-    fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): AddressResponse {
+    override fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): AddressResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- get the address by id --
         return addressService.get(accountId, id).toResponse()
@@ -55,8 +51,7 @@ class AddressController(private val addressService: AddressService) {
      * @return the [Page] of [AddressResponse].
      */
     @GetMapping
-    @Operation(summary = "Find All Address using Filter")
-    fun findAll(
+    override fun findAll(
         @RequestParam filter: String?,
         @PageableDefault(sort = ["label"], direction = Sort.Direction.ASC) pageable: Pageable,
         httpServletRequest: HttpServletRequest
@@ -73,9 +68,8 @@ class AddressController(private val addressService: AddressService) {
      * @param httpServletRequest the [HttpServletRequest].
      */
     @PostMapping("/main/{addressId}")
-    @Operation(summary = "Set the main address")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun setMainAddress(@PathVariable addressId: Long, httpServletRequest: HttpServletRequest) {
+    override fun setMainAddress(@PathVariable addressId: Long, httpServletRequest: HttpServletRequest) {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- set the main address --
         return addressService.setMainAddress(accountId, addressId)
@@ -90,8 +84,10 @@ class AddressController(private val addressService: AddressService) {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create new address")
-    fun create(@RequestBody request: AddressRequestNullable, httpServletRequest: HttpServletRequest): AddressResponse {
+    override fun create(
+        @RequestBody request: AddressRequestNullable,
+        httpServletRequest: HttpServletRequest
+    ): AddressResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- convert the Nullable request to Non Nullable --
         val nonNullRequest = request.toRequest()
@@ -116,8 +112,7 @@ class AddressController(private val addressService: AddressService) {
      * @return
      */
     @PatchMapping("/{id}")
-    @Operation(summary = "Patch / Partial Update a specific address")
-    fun patch(
+    override fun patch(
         @PathVariable id: Long,
         @RequestBody request: JsonNode,
         httpServletRequest: HttpServletRequest
@@ -134,9 +129,8 @@ class AddressController(private val addressService: AddressService) {
      * @param httpServletRequest the [HttpServletRequest].
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete an Address with the given id")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: Long, httpServletRequest: HttpServletRequest) {
+    override fun delete(@PathVariable id: Long, httpServletRequest: HttpServletRequest) {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- delete the address --
         addressService.delete(accountId, id)
