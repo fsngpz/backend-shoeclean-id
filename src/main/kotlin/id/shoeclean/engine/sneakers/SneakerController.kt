@@ -1,8 +1,6 @@
 package id.shoeclean.engine.sneakers
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -28,8 +26,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 @RestController
 @RequestMapping("/v1/sneakers")
-@Tag(name = "Sneakers API")
-class SneakerController(private val sneakerService: SneakerService) {
+class SneakerController(private val sneakerService: SneakerService) : SneakerSwaggerController {
 
 
     /**
@@ -40,8 +37,7 @@ class SneakerController(private val sneakerService: SneakerService) {
      * @return the [SneakerResponse] instance.
      */
     @GetMapping("/{id}")
-    @Operation(summary = "Get a specific address by id")
-    fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): SneakerResponse {
+    override fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): SneakerResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- get the address by id --
         return sneakerService.get(accountId, id).toResponse()
@@ -56,8 +52,7 @@ class SneakerController(private val sneakerService: SneakerService) {
      * @return the [Page] of [SneakerResponse].
      */
     @GetMapping
-    @Operation(summary = "Find All Sneakers using Filter")
-    fun findAll(
+    override fun findAll(
         @RequestParam filter: String?,
         @PageableDefault(sort = ["brand"], direction = Sort.Direction.ASC) pageable: Pageable,
         httpServletRequest: HttpServletRequest
@@ -76,8 +71,10 @@ class SneakerController(private val sneakerService: SneakerService) {
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a Sneaker")
-    fun create(@RequestBody request: SneakerRequest, httpServletRequest: HttpServletRequest): SneakerResponse {
+    override fun create(
+        @RequestBody request: SneakerRequestNullable,
+        httpServletRequest: HttpServletRequest
+    ): SneakerResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- validate the request body --
         requireNotNull(request.brand) {
@@ -99,8 +96,7 @@ class SneakerController(private val sneakerService: SneakerService) {
      * @return
      */
     @PatchMapping("/{id}")
-    @Operation(summary = "Patch / Partial Update a specific sneaker")
-    fun patch(
+    override fun patch(
         @PathVariable id: Long,
         @RequestBody request: JsonNode,
         httpServletRequest: HttpServletRequest
@@ -117,9 +113,8 @@ class SneakerController(private val sneakerService: SneakerService) {
      * @param httpServletRequest the [HttpServletRequest].
      */
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a Sneaker with the given id")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun delete(@PathVariable id: Long, httpServletRequest: HttpServletRequest) {
+    override fun delete(@PathVariable id: Long, httpServletRequest: HttpServletRequest) {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- delete the sneaker --
         sneakerService.delete(accountId, id)
