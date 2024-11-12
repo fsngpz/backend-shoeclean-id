@@ -119,21 +119,41 @@ class AccountServiceTest(@Autowired private val accountService: AccountService) 
     }
 
     @Test
-    fun `getDetails, success`() {
+    fun `getDetails, success with MAIN address`() {
         val mockAccount = Account(user = User("example@mail.com", "pass")).apply {
             this.id = 1L
             this.name = "John Doe"
             this.profilePictureUrl = "image.url"
-            this.address = Address(
-                this,
-                "Label",
-                "Line",
-                "City",
-                "District",
-                "Subdistrict",
-                "Indonesia"
-            ).apply { this.id = 1L }
         }
+        val mockAddressOne = Address(
+            mockAccount,
+            "Label",
+            "Line",
+            "City",
+            "District",
+            "Subdistrict",
+            "Indonesia"
+        ).apply {
+            this.id = 1L
+            this.isMainAddress = false
+        }
+        val mockAddressTwo = Address(
+            mockAccount,
+            "Label Two",
+            "Line Two",
+            "City Two",
+            "District Two",
+            "Subdistrict Two",
+            "Indonesia"
+        ).apply {
+            this.id = 2L
+            this.isMainAddress = true
+        }
+        // -- set the addresses of mockAccount --
+        mockAccount.apply {
+            this.addresses = listOf(mockAddressOne, mockAddressTwo)
+        }
+
         // -- mock --
         whenever(mockAccountRepository.findById(any<Long>())).thenReturn(Optional.of(mockAccount))
 
@@ -145,5 +165,77 @@ class AccountServiceTest(@Autowired private val accountService: AccountService) 
         assertThat(result.mobile).isEqualTo(mockAccount.user.mobile)
         assertThat(result.isEmailVerified).isFalse()
         assertThat(result.mainAddress).isNotNull
+        assertThat(result.mainAddress?.id).isEqualTo(mockAddressTwo.id)
+    }
+
+    @Test
+    fun `getDetails, success with ANY address`() {
+        val mockAccount = Account(user = User("example@mail.com", "pass")).apply {
+            this.id = 1L
+            this.name = "John Doe"
+            this.profilePictureUrl = "image.url"
+        }
+        val mockAddressOne = Address(
+            mockAccount,
+            "Label",
+            "Line",
+            "City",
+            "District",
+            "Subdistrict",
+            "Indonesia"
+        ).apply {
+            this.id = 1L
+            this.isMainAddress = false
+        }
+        val mockAddressTwo = Address(
+            mockAccount,
+            "Label Two",
+            "Line Two",
+            "City Two",
+            "District Two",
+            "Subdistrict Two",
+            "Indonesia"
+        ).apply {
+            this.id = 2L
+            this.isMainAddress = false
+        }
+        // -- set the addresses of mockAccount --
+        mockAccount.apply {
+            this.addresses = listOf(mockAddressOne, mockAddressTwo)
+        }
+
+        // -- mock --
+        whenever(mockAccountRepository.findById(any<Long>())).thenReturn(Optional.of(mockAccount))
+
+        // -- execute and verify --
+        val result = accountService.getDetails(1L)
+        assertThat(result.name).isEqualTo(mockAccount.name)
+        assertThat(result.profilePictureUrl).isEqualTo(mockAccount.profilePictureUrl)
+        assertThat(result.email).isEqualTo(mockAccount.user.email)
+        assertThat(result.mobile).isEqualTo(mockAccount.user.mobile)
+        assertThat(result.isEmailVerified).isFalse()
+        assertThat(result.mainAddress).isNotNull
+    }
+
+    @Test
+    fun `getDetails, success WITHOUT address`() {
+        val mockAccount = Account(user = User("example@mail.com", "pass")).apply {
+            this.id = 1L
+            this.name = "John Doe"
+            this.profilePictureUrl = "image.url"
+            this.addresses = listOf()
+        }
+
+        // -- mock --
+        whenever(mockAccountRepository.findById(any<Long>())).thenReturn(Optional.of(mockAccount))
+
+        // -- execute and verify --
+        val result = accountService.getDetails(1L)
+        assertThat(result.name).isEqualTo(mockAccount.name)
+        assertThat(result.profilePictureUrl).isEqualTo(mockAccount.profilePictureUrl)
+        assertThat(result.email).isEqualTo(mockAccount.user.email)
+        assertThat(result.mobile).isEqualTo(mockAccount.user.mobile)
+        assertThat(result.isEmailVerified).isFalse()
+        assertThat(result.mainAddress).isNull()
     }
 }

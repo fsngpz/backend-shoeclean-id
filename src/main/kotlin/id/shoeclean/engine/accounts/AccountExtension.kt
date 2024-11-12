@@ -1,5 +1,6 @@
 package id.shoeclean.engine.accounts
 
+import id.shoeclean.engine.addresses.getMainAddress
 import id.shoeclean.engine.addresses.toResponse
 
 /**
@@ -9,6 +10,8 @@ import id.shoeclean.engine.addresses.toResponse
  * @since 2024-11-09
  */
 fun Account.toDetailsResponse(): AccountDetailsResponse {
+    // -- get the main address --
+    val mainAddress = this.addresses?.getMainAddress()
     // -- map the instance to AccountDetailsResponse --
     return AccountDetailsResponse(
         name = this.name,
@@ -16,6 +19,6 @@ fun Account.toDetailsResponse(): AccountDetailsResponse {
         mobile = this.user.mobile,
         profilePictureUrl = this.profilePictureUrl,
         isEmailVerified = this.user.emailVerifiedAt != null,
-        mainAddress = this.address?.toResponse()
+        mainAddress = mainAddress?.toResponse()
     )
 }

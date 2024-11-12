@@ -76,3 +76,15 @@ fun AddressRequestNullable.toRequest(): AddressRequest {
         isMainAddress = this.isSelected ?: false
     )
 }
+
+/**
+ * an extension function get the main address from [List] of [Address].
+ *
+ * @return the [Address] or null.
+ */
+fun List<Address>.getMainAddress(): Address? {
+    // -- filter the address with field isMainAddress to true --
+    val mainAddress = this.find { it.isMainAddress }
+    // -- if the main address null, find any address --
+    return mainAddress ?: this.getOrNull(0)
+}

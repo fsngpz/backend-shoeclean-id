@@ -5,7 +5,7 @@ import id.shoeclean.engine.utils.AuditableBaseEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "addresses")
 class Address(
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "account_id")
     val account: Account,
 

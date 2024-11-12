@@ -36,6 +36,6 @@ class Account(
     @OnDelete(action = OnDeleteAction.CASCADE)
     var notificationLogs: Set<NotificationLog> = setOf()
 
-    @OneToOne(mappedBy = "account")
-    var address: Address? = null
+    @OneToMany(mappedBy = "account")
+    var addresses: List<Address>? = null
 }
