@@ -13,3 +13,32 @@ fun Sneaker.toResponse(): SneakerResponse {
     }
     return SneakerResponse(id, this.brand, this.color, this.imageUrl)
 }
+
+/**
+ * an extension function to convert the [SneakerRequestNullable] to [SneakerRequest].
+ *
+ * @return the [SneakerRequest] instance.
+ */
+fun SneakerRequestNullable.toRequest(): SneakerRequest {
+    // -- validate the SneakerRequestNullable --
+    requireNotNull(this.brand) {
+        "field brand cannot be null"
+    }
+    requireNotNull(this.color) {
+        "field color cannot be null"
+    }
+    return SneakerRequest(this.brand, this.color)
+}
+
+
+/**
+ * an extension function to convert the [Sneaker] to [SneakerRequestNullable] instance.
+ *
+ * @return the [SneakerRequestNullable] instance.
+ */
+fun Sneaker.toRequestNullable(): SneakerRequestNullable {
+    return SneakerRequestNullable(
+        brand = this.brand,
+        color = this.color
+    )
+}

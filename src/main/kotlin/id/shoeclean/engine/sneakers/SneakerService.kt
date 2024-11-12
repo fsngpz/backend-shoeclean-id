@@ -1,5 +1,7 @@
 package id.shoeclean.engine.sneakers
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import id.shoeclean.engine.accounts.AccountService
 import id.shoeclean.engine.exceptions.SneakerNotFoundException
 import org.springframework.data.domain.Page
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class SneakerService(
+    private val objectMapper: ObjectMapper,
     private val accountService: AccountService,
     private val sneakerRepository: SneakerRepository
 ) {
@@ -23,12 +26,12 @@ class SneakerService(
      *
      * @param accountId the account unique identifier.
      * @param sneakerId the sneaker unique identifier.
-     * @return the [SneakerResponse] instance.
+     * @return the [Sneaker] instance.
      */
-    fun get(accountId: Long, sneakerId: Long): SneakerResponse {
+    fun get(accountId: Long, sneakerId: Long): Sneaker {
         val account = accountService.get(accountId)
         // -- find the sneaker or else throw an exception --
-        return sneakerRepository.findByIdAndAccount(sneakerId, account)?.toResponse()
+        return sneakerRepository.findByIdAndAccount(sneakerId, account)
             ?: throw SneakerNotFoundException("you dont have sneaker with id '$sneakerId'")
     }
 
@@ -75,6 +78,47 @@ class SneakerService(
         sneakerRepository.save(sneaker)
         // -- map and return --
         return sneaker.toResponse()
+    }
+
+    /**
+     * a function to handle update of [Sneaker] instance.
+     *
+     * @param accountId the account unique identifier.
+     * @param sneakerId the sneaker unique identifier.
+     * @param request the [SneakerRequestNullable] instance.
+     * @return the [Sneaker] instance.
+     */
+    fun put(accountId: Long, sneakerId: Long, request: SneakerRequestNullable): Sneaker {
+        // -- convert the Nullable request to Non Nullable --
+        val nonNullRequest = request.toRequest()
+        // -- get the Address in database then update --
+        val sneaker = get(accountId, sneakerId).apply {
+            this.brand = nonNullRequest.brand
+            this.color = nonNullRequest.color
+        }
+        // -- save and return the instance --
+        return sneakerRepository.save(sneaker)
+    }
+
+    /**
+     * a function to patch / partial update to [Sneaker].
+     *
+     * @param accountId the account unique identifier.
+     * @param sneakerId the sneaker unique identifier.
+     * @param request the [JsonNode] as a request body.
+     * @return the [Sneaker] instance.
+     */
+    fun patch(accountId: Long, sneakerId: Long, request: JsonNode): Sneaker {
+        // -- get the instance of Sneaker --
+        val sneaker = get(accountId, sneakerId)
+        // -- convert the Sneaker instance to SneakerRequestNullable --
+        val body = sneaker.toRequestNullable()
+        // -- read object value to update --
+        val reader = objectMapper.readerForUpdating(body)
+        // -- convert the request to SneakerRequestNullable --
+        val updatedSneaker = reader.readValue<SneakerRequestNullable>(request)
+        // -- do an update --
+        return put(accountId, sneakerId, updatedSneaker)
     }
 
     /**

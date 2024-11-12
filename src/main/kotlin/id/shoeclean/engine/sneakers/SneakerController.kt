@@ -1,5 +1,6 @@
 package id.shoeclean.engine.sneakers
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
@@ -10,6 +11,7 @@ import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -42,7 +44,7 @@ class SneakerController(private val sneakerService: SneakerService) {
     fun getAddress(@PathVariable id: Long, httpServletRequest: HttpServletRequest): SneakerResponse {
         val accountId = httpServletRequest.getHeader("ID").toLong()
         // -- get the address by id --
-        return sneakerService.get(accountId, id)
+        return sneakerService.get(accountId, id).toResponse()
     }
 
     /**
@@ -86,6 +88,26 @@ class SneakerController(private val sneakerService: SneakerService) {
         }
         // -- create the new sneaker --
         return sneakerService.create(accountId, request.brand, request.color)
+    }
+
+    /**
+     * a PATCH mapping to handle request update partial the [Sneaker].
+     *
+     * @param id the sneaker unique identifier.
+     * @param request the [JsonNode] as a request body.
+     * @param httpServletRequest the [HttpServletRequest].
+     * @return
+     */
+    @PatchMapping("/{id}")
+    @Operation(summary = "Patch / Partial Update a specific sneaker")
+    fun patch(
+        @PathVariable id: Long,
+        @RequestBody request: JsonNode,
+        httpServletRequest: HttpServletRequest
+    ): SneakerResponse {
+        val accountId = httpServletRequest.getHeader("ID").toLong()
+        // -- do patch the address --
+        return sneakerService.patch(accountId, id, request).toResponse()
     }
 
     /**

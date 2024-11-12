@@ -6,4 +6,4 @@ package id.shoeclean.engine.sneakers
  * @author Ferdinand Sangap.
  * @since 2024-10-23
  */
-data class SneakerRequest(val brand: String?, val color: String?)
+data class SneakerRequest(val brand: String, val color: String)

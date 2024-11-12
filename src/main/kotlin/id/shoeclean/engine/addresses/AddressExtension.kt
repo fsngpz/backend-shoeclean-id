@@ -47,7 +47,7 @@ fun Address.toRequestNullable(): AddressRequestNullable {
  * @return the [AddressRequest] instance.
  */
 fun AddressRequestNullable.toRequest(): AddressRequest {
-    // -- validate the request body --
+    // -- validate the AddressRequestNullable --
     requireNotNull(this.label) {
         "field label cannot be null"
     }
