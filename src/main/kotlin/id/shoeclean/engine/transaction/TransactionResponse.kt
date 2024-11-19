@@ -13,7 +13,9 @@ import java.time.OffsetDateTime
 data class TransactionResponse(
     val uscId: String,
     val serviceType: ServiceType,
-    val amount: BigDecimal,
+    val totalAmount: BigDecimal,
+    val discount: BigDecimal,
+    val subtotal: BigDecimal,
     val method: TransactionMethod,
     val status: TransactionStatus,
     val createdAt: OffsetDateTime

@@ -1,5 +1,7 @@
 package id.shoeclean.engine.transaction
 
+import id.shoeclean.engine.orders.toOrderDetailResponse
+
 /**
  * an extension class to map the [Transaction] to [TransactionResponse].
  *
@@ -12,11 +14,14 @@ fun Transaction.toResponse(): TransactionResponse {
     requireNotNull(uscId) {
         throw IllegalArgumentException("the uscId is null")
     }
+    val orderDetails = this.order.toOrderDetailResponse(this.order.voucher)
     // -- map the Transaction to TransactionResponse --
     return TransactionResponse(
         uscId = uscId,
         serviceType = this.order.catalog.serviceType,
-        amount = this.totalAmount,
+        subtotal = orderDetails.subtotal,
+        discount = orderDetails.discount,
+        totalAmount = orderDetails.totalAmount,
         method = this.method,
         status = this.status,
         createdAt = this.createdAt

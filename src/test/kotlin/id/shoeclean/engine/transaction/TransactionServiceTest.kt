@@ -40,7 +40,7 @@ class TransactionServiceTest(@Autowired private val transactionService: Transact
     }
 
     @Test
-    fun `create success`() {
+    fun `create success UNPAID status`() {
         val mockOrder = mock<Order>()
         val request = EventNewTransactionRequest(
             mockOrder,
@@ -62,6 +62,33 @@ class TransactionServiceTest(@Autowired private val transactionService: Transact
         verify(mockTransactionRepository).save(captor.capture())
         val captured = captor.firstValue
         assertThat(captured).isNotNull
+        assertThat(captured.status).isEqualTo(TransactionStatus.UNPAID)
+    }
+
+    @Test
+    fun `create success PAID status`() {
+        val mockOrder = mock<Order>()
+        val request = EventNewTransactionRequest(
+            mockOrder,
+            BigDecimal(10_000_000),
+            BigDecimal(10_000_000),
+            BigDecimal.ZERO,
+            TransactionMethod.BANK_TRANSFER
+        )
+        val mockTransaction = mock<Transaction>()
+        // -- mock --
+        whenever(mockTransactionRepository.save(any<Transaction>())).thenReturn(mockTransaction)
+
+        // -- execute --
+        val result = transactionService.create(request)
+        assertThat(result.javaClass).isEqualTo(Transaction::class.java)
+
+        // -- verify --
+        val captor = argumentCaptor<Transaction>()
+        verify(mockTransactionRepository).save(captor.capture())
+        val captured = captor.firstValue
+        assertThat(captured).isNotNull
+        assertThat(captured.status).isEqualTo(TransactionStatus.PAID)
     }
 
     @Test

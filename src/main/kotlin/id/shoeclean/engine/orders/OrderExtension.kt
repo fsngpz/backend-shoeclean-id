@@ -1,8 +1,6 @@
 package id.shoeclean.engine.orders
 
 import id.shoeclean.engine.addresses.toResponse
-import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
-import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
 import id.shoeclean.engine.vouchers.Voucher
 import id.shoeclean.engine.vouchers.VoucherType
 import java.math.BigDecimal
@@ -82,31 +80,5 @@ fun Order.getDiscount(voucher: Voucher?): BigDecimal {
             discount = subtotal
         }
         discount
-    }
-}
-
-/**
- * a function to validate the total pairs with voucher amount.
- *
- * @param totalPairs the total pairs.
- * @param voucherAmount the voucher amount.
- */
-fun validateTotalPairsAndVoucher(totalPairs: Int, voucherAmount: BigDecimal) {
-    val isSuffice = BigDecimal(totalPairs) >= voucherAmount
-    if (!isSuffice) {
-        throw VoucherNotSufficeOrderQtyException("Total pair can't be less than voucher amount")
-    }
-}
-
-/**
- * function to validate the subtotal with voucher amount.
- *
- * @param subtotal the subtotal of order.
- * @param voucherAmount the voucher amount
- */
-fun validateSubtotalAndVoucher(subtotal: BigDecimal, voucherAmount: BigDecimal) {
-    val isSuffice = subtotal >= voucherAmount
-    if (!isSuffice) {
-        throw VoucherNotSufficeOrderSubtotalException("sub total can't be less than voucher amount")
     }
 }
