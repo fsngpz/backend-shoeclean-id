@@ -240,6 +240,7 @@ CREATE TABLE transactions
     updater_id          text                                               NOT NULL,
     version             bigint                   DEFAULT 0                 NOT NULL
 );
+CREATE UNIQUE INDEX transactions_order_id_uindex ON transactions(order_id);
 
 /*
  * Orders Sneakers
