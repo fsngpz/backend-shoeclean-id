@@ -5,6 +5,7 @@ import id.shoeclean.engine.orders.Order
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -58,6 +59,12 @@ class TransactionService(private val transactionRepository: TransactionRepositor
         require(!isDuplicate) {
             throw DuplicateTransactionException("the order ${request.order.uscId} already created")
         }
+        // -- determine the transaction status by the finalAmount --
+        val status = if (request.finalAmount == BigDecimal.ZERO) {
+            TransactionStatus.PAID
+        } else {
+            TransactionStatus.UNPAID
+        }
         // -- setup new transaction --
         val transaction = Transaction(
             request.order,
@@ -65,6 +72,7 @@ class TransactionService(private val transactionRepository: TransactionRepositor
             request.deduction
         ).apply {
             this.method = request.method
+            this.status = status
         }
         // -- save the instance --
         return transactionRepository.save(transaction)
