@@ -199,6 +199,22 @@ class ControllerExceptionHandler {
     }
 
     /**
+     * Handle the VoucherQuotaExceededException.
+     *
+     * @param e the [VoucherQuotaExceededException].
+     * @return the [ErrorResponse] with [HttpStatus.BAD_REQUEST].
+     */
+    @ExceptionHandler
+    fun handleVoucherQuotaExceededException(
+        e: VoucherQuotaExceededException
+    ): ResponseEntity<ErrorResponse> {
+        // -- setup the instance of error response --
+        val errorResponse = getErrorResponse(e)
+        // -- return as response entity --
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse)
+    }
+
+    /**
      * a private method to handle setup the [ErrorResponse].
      *
      * @param e the [RuntimeException].

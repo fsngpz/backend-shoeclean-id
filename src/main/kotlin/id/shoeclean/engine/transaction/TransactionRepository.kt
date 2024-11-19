@@ -1,5 +1,6 @@
 package id.shoeclean.engine.transaction
 
+import id.shoeclean.engine.orders.Order
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -39,4 +40,12 @@ interface TransactionRepository : JpaRepository<Transaction, Long> {
         createdAtTo: OffsetDateTime,
         pageable: Pageable
     ): Page<Transaction>
+
+    /**
+     * a method to find the [Transaction] using the [Order] instance.
+     *
+     * @param order the [Order] instance.
+     * @return the [Transaction] or null.
+     */
+    fun findByOrder(order: Order): Transaction?
 }

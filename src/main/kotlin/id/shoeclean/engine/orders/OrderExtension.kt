@@ -67,14 +67,21 @@ fun Order.getDiscount(voucher: Voucher?): BigDecimal {
         return BigDecimal.ZERO
     }
     return if (voucher.type == VoucherType.FREE_PAIR) {
-        validateTotalPairsAndVoucher(this.totalPairs, voucher.amount)
+        var freePairs = voucher.amount
+        // -- when the freePairs is greater than the totalPairs, return the totalPairs --
+        if (freePairs > totalPairs) {
+            freePairs = totalPairs
+        }
         // -- for free pair it will calculate the price with the voucher amount --
-        price.multiply(voucher.amount)
+        price.multiply(freePairs)
     } else {
         val subtotal = price.multiply(totalPairs)
-        validateSubtotalAndVoucher(subtotal, voucher.amount)
-        // -- for discount, return the amount --
-        voucher.amount
+        var discount = voucher.amount
+        // -- when the discount is greater than the subtotal, return the subtotal --
+        if (discount > subtotal) {
+            discount = subtotal
+        }
+        discount
     }
 }
 

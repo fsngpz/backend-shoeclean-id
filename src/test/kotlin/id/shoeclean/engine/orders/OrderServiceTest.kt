@@ -8,8 +8,6 @@ import id.shoeclean.engine.catalogs.Catalog
 import id.shoeclean.engine.catalogs.CatalogService
 import id.shoeclean.engine.catalogs.ServiceType
 import id.shoeclean.engine.exceptions.OrderNotFoundException
-import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderQtyException
-import id.shoeclean.engine.exceptions.VoucherNotSufficeOrderSubtotalException
 import id.shoeclean.engine.transaction.EventNewTransactionRequest
 import id.shoeclean.engine.transaction.TransactionMethod
 import id.shoeclean.engine.vouchers.AmountType
@@ -184,14 +182,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
     }
 
     /**
-     * This test will throw an exception because the total pairs of order is 2 while the voucher amount is 3 with
-     * type [VoucherType.FREE_PAIR].
+     * This test will return zero of the total amount because the total pairs of order is 2 while the voucher amount
+     * is 3 with type [VoucherType.FREE_PAIR].
      *
      */
     @Test
     fun `getDetails, total pairs not suffice the voucher amount`() {
         val mockAccount = mock<Account>()
-        val mockAddress = mock<Address>()
+        val mockAddress = createMockAddress()
         val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
         val mockVoucher = Voucher(
             "TEST",
@@ -216,7 +214,8 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
         // -- execute --
-        assertThrows<VoucherNotSufficeOrderQtyException> { orderService.getDetails(1L, "USC111") }
+        val result = orderService.getDetails(1L, "USC111")
+        assertThat(result.totalAmount).isZero
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
@@ -224,14 +223,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
     }
 
     /**
-     * This test will throw an exception because the subtotal of order is 30_000 while the voucher amount is 50_000 with
-     * type [VoucherType.DISCOUNT].
+     * This test will return the total amount to 30_000 because the subtotal of order is 30_000 while the voucher a
+     * mount is 50_000 with type [VoucherType.DISCOUNT].
      *
      */
     @Test
-    fun `getDetails, subtotal not suffice the voucher amount`() {
+    fun `getDetails, voucher amount greater than subtotal`() {
         val mockAccount = mock<Account>()
-        val mockAddress = mock<Address>()
+        val mockAddress = createMockAddress()
         val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
         val mockVoucher = Voucher(
             "TEST",
@@ -255,8 +254,11 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockAccountService.get(any<Long>())).thenReturn(mockAccount)
         whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
 
+        // -- set the expected discount which is TotalPairs * Price --
+        val expectedDiscount = BigDecimal(mockOrder.totalPairs).multiply(mockCatalog.price)
         // -- execute --
-        assertThrows<VoucherNotSufficeOrderSubtotalException> { orderService.getDetails(1L, "USC111") }
+        val result = orderService.getDetails(1L, "USC111")
+        assertThat(result.discount).isEqualTo(expectedDiscount)
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
@@ -397,14 +399,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
     }
 
     /**
-     * This test will throw an exception because the total pairs of order is 2 while the voucher amount is 3 with
+     * This test will return total amount ZERO because the total pairs of order is 2 while the voucher amount is 3 with
      * type [VoucherType.FREE_PAIR].
      *
      */
     @Test
-    fun `applyVoucher, total pairs not suffice the voucher amount`() {
+    fun `applyVoucher, voucher free pairs greater than total pairs`() {
         val mockAccount = mock<Account>()
-        val mockAddress = mock<Address>()
+        val mockAddress = createMockAddress()
         val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
         val mockVoucher = Voucher(
             "TEST",
@@ -429,13 +431,12 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
 
         // -- execute --
-        assertThrows<VoucherNotSufficeOrderQtyException> {
-            orderService.applyVoucher(
-                1L,
-                "USC111",
-                "USCXUnitTest"
-            )
-        }
+        val result = orderService.applyVoucher(
+            1L,
+            "USC111",
+            "USCXUnitTest"
+        )
+        assertThat(result.totalAmount).isZero
 
         // -- verify --
         verify(mockAccountService).get(any<Long>())
@@ -443,14 +444,14 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
     }
 
     /**
-     * This test will throw an exception because the subtotal of order is 30_000 while the voucher amount is 50_000 with
-     * type [VoucherType.DISCOUNT].
+     * This test will return the discount 30_000 because the subtotal of order is 30_000 while the voucher amount
+     * is 50_000 with type [VoucherType.DISCOUNT].
      *
      */
     @Test
-    fun `applyVoucher, subtotal not suffice the voucher amount`() {
+    fun `applyVoucher, voucher amount greater than subtotal`() {
         val mockAccount = mock<Account>()
-        val mockAddress = mock<Address>()
+        val mockAddress = createMockAddress()
         val mockCatalog = Catalog(ServiceType.REPAIR, "Test", BigDecimal("15000"))
         val mockVoucher = Voucher(
             "TEST",
@@ -474,14 +475,15 @@ class OrderServiceTest(@Autowired private val orderService: OrderService) {
         whenever(mockOrderRepository.findByUscIdAndAccount(any<String>(), any<Account>())).thenReturn(mockOrder)
         whenever(mockVoucherService.get(any<String>())).thenReturn(mockVoucher)
 
+        val expectedDiscount = BigDecimal(mockOrder.totalPairs).multiply(mockCatalog.price)
         // -- execute --
-        assertThrows<VoucherNotSufficeOrderSubtotalException> {
-            orderService.applyVoucher(
-                1L,
-                "USC111",
-                "USCXUnitTest"
-            )
-        }
+        val result = orderService.applyVoucher(
+            1L,
+            "USC111",
+            "USCXUnitTest"
+        )
+        assertThat(result.discount).isEqualTo(expectedDiscount)
+
         // -- verify --
         verify(mockAccountService).get(any<Long>())
         verify(mockOrderRepository).findByUscIdAndAccount(any<String>(), any<Account>())

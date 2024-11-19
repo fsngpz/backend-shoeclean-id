@@ -1,12 +1,15 @@
 package id.shoeclean.engine.transaction
 
+import id.shoeclean.engine.exceptions.DuplicateTransactionException
 import id.shoeclean.engine.orders.Order
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +40,7 @@ class TransactionServiceTest(@Autowired private val transactionService: Transact
     }
 
     @Test
-    fun `create succes`() {
+    fun `create success`() {
         val mockOrder = mock<Order>()
         val request = EventNewTransactionRequest(
             mockOrder,
@@ -59,6 +62,27 @@ class TransactionServiceTest(@Autowired private val transactionService: Transact
         verify(mockTransactionRepository).save(captor.capture())
         val captured = captor.firstValue
         assertThat(captured).isNotNull
+    }
+
+    @Test
+    fun `create, attempting to create duplicate order`() {
+        val mockOrder = mock<Order>()
+        val request = EventNewTransactionRequest(
+            mockOrder,
+            BigDecimal(10_000_000),
+            BigDecimal.ZERO,
+            BigDecimal(10_000_000),
+            TransactionMethod.BANK_TRANSFER
+        )
+        val mockTransaction = mock<Transaction>()
+        // -- mock --
+        whenever(mockTransactionRepository.findByOrder(any<Order>())).thenReturn(mockTransaction)
+
+        // -- execute --
+        assertThrows<DuplicateTransactionException> { transactionService.create(request) }
+
+        // -- verify --
+        verify(mockTransactionRepository, never()).save(any<Transaction>())
     }
 
     @Test
